@@ -1,0 +1,860 @@
+/**
+ * Restaurant / POS token layer.
+ *
+ * Values are read out of the Figma file (lIvZfyApQVpU0O0u7z2Xft) rather than
+ * guessed: the file publishes exactly one variable (`Labels/Primary #000000`),
+ * so every other token here was recovered from the frames themselves via
+ * get_design_context and cross-checked across both the JUSTPOS tablet screens
+ * and the captain floor screens, which agree on all of them.
+ *
+ * Scoped under `.rst` so the POS palette cannot leak into the rest of the
+ * product. The brand red is far more saturated than the platform accent and a
+ * global override would repaint every vertical.
+ *
+ * Deliberately NOT taken from the designs:
+ *   - currency. The phone screens show USD and the tablet screens INR for the
+ *     same product. Neither is a fact about a tenant; `fmtOrgMoney` is.
+ *   - the "Tax 5% / CGST 5% / GST 5%" stack in the cart. That is not a real
+ *     regime anywhere — CGST pairs with SGST, or IGST stands alone — and
+ *     Organization already carries country + taxRegime.
+ */
+
+.rst {
+  /* Brand. One red, used for primary actions, the active nav item and alerts. */
+  /* The PRODUCT brand, not the Figma red: the POS is a BMN Connect surface and
+     every other screen's primary action is navy. `--navy` flips for dark mode
+     in globals.css, so this follows it. */
+  --rst-brand: var(--navy, #132376);
+  --rst-brand-tint: #eef0fb;
+  --rst-brand-tint: color-mix(in srgb, var(--navy, #132376) 9%, white);
+  /* Warnings stay red — a problem must not look like a primary action. */
+  --rst-alert: #c62828;
+
+  /* Status. Each is a foreground with a matching tint, as the frames use them. */
+  --rst-good: #00ba28;
+  --rst-good-tint: #edffe8;
+  --rst-good-tint-strong: #d1ffdb;
+
+  --rst-warn: #ba8f00;
+  --rst-warn-tint: #fff4cf;
+  --rst-warn-tint-soft: #fff6de;
+
+  --rst-info: #0066ba;
+  --rst-info-tint: #d3ebff;
+  --rst-info-tint-soft: #edfbff;
+
+  /* Neutrals. */
+  --rst-ink: #000000;
+  --rst-ink-2: #636363;
+  --rst-surface: #f6f6f6;
+  --rst-surface-2: #f3f3f3;
+  --rst-line: #e6e6e6;
+  --rst-bg: #ffffff;
+
+  /* Table states on the captain floor grid.
+     Read off the legend swatches, not guessed from the cards: the blue is
+     CLEANING and the grey is AVAILABLE, which is the opposite of what the grid
+     suggests at a glance — a blue card showing "5 min" is five minutes into
+     being cleaned, not five minutes into a meal. The number is time-in-status. */
+  --rst-table-available: #f6f6f6;
+  --rst-table-occupied: #ffb7a8;
+  --rst-table-cleaning: #addaff;
+  --rst-table-cleaning-soft: #cbe7ff;
+
+  /* Radii — 5px is used for all but 35 of the rounded nodes in the file. */
+  --rst-r: 5px;
+  --rst-r-lg: 10px;
+  --rst-r-pill: 999px;
+
+  /* Type. Lato throughout; SF Pro appears only in the mocked iOS status bar,
+     which is chrome we do not render. */
+  --rst-font: 'Lato', var(--font-sans, system-ui), sans-serif;
+  --rst-fs-xs: 12px;
+  --rst-fs-sm: 14px;
+  --rst-fs-md: 16px;
+  --rst-fs-lg: 18px;
+  --rst-fs-xl: 24px;
+
+  /* Bridge for generic CRM components (like Modal) that use these */
+  --surface: var(--rst-surface);
+  --text: var(--rst-ink);
+  --ink: var(--rst-ink);
+  --text-muted: var(--rst-ink-2);
+  --border: var(--rst-line);
+
+  font-family: var(--rst-font);
+  color: var(--rst-ink);
+}
+
+/* Dark is a first-class variant in the file: every JUSTPOS screen is drawn
+   twice. The frames keep the same brand red and status hues and swap only the
+   neutrals, so only the neutrals are redefined here. */
+[data-theme='dark'] .rst,
+.dark .rst,
+.rst.rst-dark {
+  --rst-ink: #f4f4f4;
+  --rst-ink-2: #a5a5a5;
+  --rst-surface: #1c1c1c;
+  --rst-surface-2: #232323;
+  --rst-line: #303030;
+  --rst-bg: #121212;
+
+  --rst-warn-tint: #4d3b14;
+  --rst-table-available: #232323;
+  --rst-table-occupied: #59251c;
+  --rst-table-cleaning: #183e5c;
+  --rst-table-cleaning-soft: #12283a;
+}
+
+/* ── layout pieces the POS screens need and the platform kit does not have ── */
+
+/* Recent orders beside the stock/actions column, stacking on a narrow tablet.
+   The Figma frame is a fixed 1194px landscape; this keeps the same reading
+   order when the same page is opened on a phone. */
+.rst-home-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr);
+  gap: var(--gap-section, 20px);
+  align-items: start;
+}
+@media (max-width: 1080px) {
+  .rst-home-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The table pill on an order row — "T5", "T12", or "Delivery". */
+.rst-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  padding: 3px 8px;
+  border-radius: var(--rst-r);
+  background: var(--rst-brand);
+  color: #fff;
+  font-size: var(--rst-fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.rst-stock-list { display: flex; flex-direction: column; gap: 2px; }
+.rst-stock-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--hairline, var(--rst-line));
+  font-size: var(--rst-fs-sm);
+}
+.rst-stock-list li:last-child { border-bottom: 0; }
+
+/* Two-up on the tablet the frame was drawn for, one-up when it cannot fit. */
+.rst-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rst-quick > button { justify-content: flex-start; }
+@media (max-width: 420px) {
+  .rst-quick { grid-template-columns: 1fr; }
+}
+
+/* ── Tables (console) ────────────────────────────────────────────────────── */
+
+.rst-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.rst-filters select {
+  height: 34px; padding: 0 10px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg);
+  color: inherit; font-size: var(--rst-fs-sm);
+}
+.rst-filter-count { margin-left: auto; }
+
+.rst-search {
+  display: flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 10px; min-width: 200px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg);
+  color: var(--rst-ink-2);
+}
+.rst-search input {
+  border: 0; outline: 0; background: transparent;
+  font-size: var(--rst-fs-sm); color: var(--ink, inherit); width: 100%;
+}
+
+/* The frame lays four cards across a 1194px iPad. auto-fill keeps that density
+   on the tablet and reflows rather than shrinking the text on a phone. */
+.rst-table-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+  gap: 12px;
+}
+
+.rst-table-card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px;
+  text-align: left;
+  background: var(--rst-surface);
+  border: 1px solid transparent;
+  border-radius: var(--rst-r);
+  cursor: pointer;
+  transition: border-color .12s ease, transform .12s ease;
+}
+.rst-table-card:hover { border-color: var(--rst-brand); }
+.rst-table-card:focus-visible { outline: 2px solid var(--rst-brand); outline-offset: 2px; }
+
+.rst-table-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.rst-table-name { font-size: var(--rst-fs-md); font-weight: 700; }
+.rst-table-status { font-size: var(--rst-fs-xs); font-weight: 700; }
+
+.rst-table-meta { display: flex; flex-direction: column; gap: 3px; font-size: var(--rst-fs-sm); opacity: .54; }
+.rst-table-meta span { display: inline-flex; align-items: center; gap: 5px; }
+
+.rst-popover-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.rst-popover-grid > div { display: flex; flex-direction: column; gap: 2px; }
+
+.rst-merge-picker { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.rst-merge-option {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  cursor: pointer; font-size: var(--rst-fs-sm);
+}
+.rst-merge-option.is-on { border-color: var(--rst-brand); background: var(--rst-brand-tint); }
+
+/* ── Captain floor (standalone tablet surface) ───────────────────────────── */
+
+.rst-captain {
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  background: var(--rst-bg);
+  /* Home-indicator clearance on an iPad held in portrait. */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.rst-captain-bar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rst-line);
+  position: sticky; top: 0; z-index: 5;
+  background: var(--rst-bg);
+}
+
+.rst-icon-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: var(--rst-r);
+  background: var(--rst-surface); color: inherit; border: 0; cursor: pointer;
+}
+
+.rst-seg { display: inline-flex; gap: 6px; }
+.rst-seg-item {
+  min-height: 40px; padding: 0 16px;
+  border: 1px solid var(--rst-line);
+  border-radius: var(--rst-r);
+  background: transparent; color: inherit;
+  font-size: var(--rst-fs-sm); font-weight: 500; cursor: pointer;
+}
+/* The active chip is OUTLINED, not filled — border and label both the brand colour over
+   the page background, with inactive chips sitting on the grey surface. Read
+   off node 453:9086; a filled red pill is the wrong emphasis next to the
+   status-tinted cards, which are the only saturated thing on the screen. */
+.rst-seg-item { background: var(--rst-surface); border-color: transparent; }
+.rst-seg-item.is-on {
+  background: var(--rst-bg);
+  border-color: var(--rst-brand);
+  color: var(--rst-brand);
+  font-weight: 700;
+}
+
+.rst-legend { display: flex; align-items: center; gap: 14px; margin-left: auto; font-size: var(--rst-fs-xs); }
+.rst-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.rst-legend-item i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid; }
+.rst-legend-item b { opacity: .55; font-weight: 700; }
+
+.rst-captain-body { flex: 1; padding: 16px; }
+
+/* Four across on the 834px portrait iPad the frames were drawn for. */
+.rst-floor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 10px;
+}
+
+.rst-floor-cell { position: relative; }
+
+.rst-floor-card {
+  display: flex; flex-direction: column; gap: 4px;
+  width: 100%;
+  /* A waiter taps this while walking — comfortably above the 44px minimum. */
+  min-height: 92px;
+  padding: 10px 12px;
+  text-align: left;
+  border: 0; border-radius: var(--rst-r);
+  color: #121212;
+  cursor: pointer;
+}
+.rst-floor-card:focus-visible { outline: 3px solid var(--rst-brand); outline-offset: 2px; }
+
+.rst-floor-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: var(--rst-fs-xs); }
+.rst-floor-dwell { font-weight: 500; }
+.rst-floor-cap { opacity: .7; }
+.rst-floor-name { font-size: var(--rst-fs-md); font-weight: 700; }
+.rst-floor-where { font-size: var(--rst-fs-xs); opacity: .62; }
+
+.rst-floor-cancel {
+  position: absolute; top: -6px; right: -6px;
+  width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--rst-brand); color: #fff; border: 2px solid var(--rst-bg);
+  cursor: pointer;
+}
+
+.rst-fab {
+  position: fixed;
+  right: 22px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  width: 62px; height: 62px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--rst-brand); color: #fff; border: 0;
+  box-shadow: 0 6px 20px rgba(19, 35, 118, .28);
+  cursor: pointer;
+}
+
+/* The frames are drawn dark as well as light; on the captain surface the
+   neutrals invert but the status tints stay, because they are the whole point. */
+@media (prefers-color-scheme: dark) {
+  .rst-captain {
+    --rst-ink: #f4f4f4;
+    --rst-ink-2: #a5a5a5;
+    --rst-surface: #1c1c1c;
+    --rst-line: #303030;
+    --rst-bg: #121212;
+  }
+}
+
+/* Row 1 of the captain frame: back, a wide search, then the icon cluster.
+   Row 2 carries the service chips and the legend, so only row 1 sticks. */
+.rst-captain-bar-top { border-bottom: 0; padding-bottom: 4px; }
+.rst-captain-bar-top .rst-icon-btn:nth-of-type(2) { margin-left: auto; }
+
+.rst-search-lg { flex: 1; height: 44px; border-radius: var(--rst-r); background: var(--rst-surface); border-color: transparent; }
+.rst-search-lg input { font-size: var(--rst-fs-md); }
+
+/* The captain surface owns its own dark switch, so the class form has to work
+   without prefers-color-scheme. Same neutrals as the media query above. */
+.rst-captain.rst-dark {
+  --rst-ink: #f4f4f4;
+  --rst-ink-2: #a5a5a5;
+  --rst-surface: #1c1c1c;
+  --rst-surface-2: #232323;
+  --rst-line: #303030;
+  --rst-bg: #121212;
+  color: var(--rst-ink);
+}
+
+/* ── KDS boards ──────────────────────────────────────────────────────────── */
+
+.rst-seg-sm .rst-seg-item { min-height: 32px; padding: 0 12px; font-size: var(--rst-fs-xs); }
+
+/* The frame lays three ticket columns across the iPad. Tickets are read at a
+   pass, standing up, so they get a floor not a fraction. */
+.rst-kds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+.rst-ticket {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--hairline, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--surface, var(--rst-bg));
+  overflow: hidden;
+}
+
+.rst-ticket-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 12px;
+}
+.rst-ticket-id { display: flex; align-items: baseline; gap: 9px; font-size: var(--rst-fs-sm); }
+.rst-ticket-id strong { font-size: var(--rst-fs-md); font-weight: 700; }
+.rst-ticket-id span { display: inline-flex; align-items: center; gap: 4px; opacity: .68; font-size: var(--rst-fs-xs); }
+.rst-ticket-status { font-size: var(--rst-fs-xs); font-weight: 700; white-space: nowrap; }
+
+.rst-ticket-where {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--hairline, var(--rst-line));
+  font-size: var(--rst-fs-sm); font-weight: 500;
+}
+
+.rst-ticket-items { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; }
+.rst-ticket-items li {
+  display: grid; grid-template-columns: 34px 1fr; gap: 8px; align-items: baseline;
+  padding: 3px 0; font-size: var(--rst-fs-sm);
+}
+.rst-qty { font-weight: 700; opacity: .8; }
+.rst-item-name { display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+
+/* A negative source quantity is a CANCELLATION INSTRUCTION. It must not read as
+   an ordinary line — a cook who misses the strike makes food nobody wants. */
+.rst-ticket-items li.is-cancelled .rst-item-name,
+.rst-ticket-items li.is-cancelled .rst-qty {
+  text-decoration: line-through;
+  opacity: .45;
+}
+
+.rst-new {
+  font-style: normal; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .04em; padding: 1px 5px; border-radius: var(--rst-r-pill);
+  background: var(--rst-brand); color: #fff;
+}
+
+.rst-item-note {
+  grid-column: 2; display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--rst-fs-xs); opacity: .6;
+}
+
+.rst-ticket-note {
+  margin: 0 12px 8px; padding: 7px 9px;
+  background: var(--rst-warn-tint-soft); border-radius: var(--rst-r);
+  font-size: var(--rst-fs-xs);
+}
+
+.rst-ticket-foot {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  margin-top: auto; padding: 10px 12px;
+  border-top: 1px solid var(--hairline, var(--rst-line));
+}
+
+.rst-footnote { margin-top: 14px; max-width: 72ch; }
+
+/* ── Order / till ────────────────────────────────────────────────────────── */
+
+/* The frame is catalogue-left, cart-right on a 1194px iPad. The cart is the
+   thing being read while tapping, so it keeps a floor and the catalogue flexes. */
+.rst-order-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: var(--gap-section, 20px);
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .rst-order-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+.rst-cat-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px;
+  margin-bottom: 14px;
+}
+.rst-cat {
+  display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
+  padding: 10px 11px; text-align: left; cursor: pointer;
+  background: var(--rst-surface); border: 1px solid transparent;
+  border-radius: var(--rst-r); color: inherit;
+}
+.rst-cat.is-on { background: var(--rst-brand); color: #fff; }
+.rst-cat-name { font-size: var(--rst-fs-sm); font-weight: 700; }
+.rst-cat-count { font-size: var(--rst-fs-xs); opacity: .7; }
+
+.rst-item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.rst-item {
+  display: flex; flex-direction: column; gap: 8px; justify-content: space-between;
+  padding: 10px; border: 1px solid var(--hairline, var(--rst-line));
+  border-radius: var(--rst-r);
+}
+.rst-item.is-in-cart { border-color: var(--rst-brand); background: var(--rst-brand-tint); }
+.rst-item-top { display: flex; flex-direction: column; gap: 2px; }
+.rst-item-title { font-size: var(--rst-fs-sm); font-weight: 500; }
+.rst-item-price { font-size: var(--rst-fs-xs); opacity: .7; }
+
+.rst-stepper { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.rst-stepper button {
+  width: 30px; height: 30px; border-radius: var(--rst-r);
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  background: var(--rst-bg); color: inherit; cursor: pointer;
+}
+.rst-stepper button:disabled { opacity: .35; cursor: default; }
+.rst-stepper span { font-size: var(--rst-fs-sm); font-weight: 700; min-width: 18px; text-align: center; }
+
+.rst-cart { display: flex; flex-direction: column; }
+.rst-cart-types { padding: 12px 12px 0; flex-wrap: wrap; }
+.rst-cart-field { padding: 12px 12px 0; }
+
+.rst-cart-lines { display: flex; flex-direction: column; padding: 12px; gap: 2px; }
+.rst-cart-empty { padding: 18px 0; text-align: center; }
+/* The line grid below would squeeze this into the 34px quantity column. */
+.rst-cart-lines .rst-cart-empty { display: block; border-bottom: 0; }
+.rst-cart-lines li {
+  display: grid; grid-template-columns: 34px 1fr auto 24px; gap: 8px; align-items: center;
+  padding: 6px 0; font-size: var(--rst-fs-sm);
+  border-bottom: 1px solid var(--hairline, var(--rst-line));
+}
+.rst-cart-lines li:last-child { border-bottom: 0; }
+.rst-cart-qty { font-weight: 700; opacity: .8; }
+.rst-cart-amt { font-variant-numeric: tabular-nums; }
+.rst-cart-del { background: none; border: 0; color: var(--rst-ink-2); cursor: pointer; padding: 2px; }
+.rst-cart-del:hover { color: var(--rst-brand); }
+
+.rst-totals { padding: 4px 12px 12px; border-top: 1px dashed var(--hairline-strong, var(--rst-line)); }
+.rst-totals > div { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 0; font-size: var(--rst-fs-sm); }
+.rst-totals dd { font-variant-numeric: tabular-nums; }
+.rst-totals .rst-total { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--hairline-strong, var(--rst-line)); }
+.rst-totals .rst-total dt { font-size: var(--rst-fs-md); font-weight: 700; }
+.rst-totals .rst-total dd { font-size: var(--rst-fs-lg); font-weight: 700; }
+
+.rst-pay { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.rst-pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.rst-pay-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 9px 6px; cursor: pointer; font-size: var(--rst-fs-xs);
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r); background: var(--rst-bg); color: inherit;
+}
+.rst-pay-btn.is-on { border-color: var(--rst-brand); background: var(--rst-brand-tint); color: var(--rst-brand); font-weight: 700; }
+
+.rst-cart-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 14px; }
+
+.rst-warnbar { display: flex; flex-direction: column; gap: 2px; }
+.rst-warnbar strong { color: var(--rst-alert); font-size: var(--rst-fs-sm); }
+.rst-warnbar span { font-size: var(--rst-fs-xs); opacity: .75; }
+
+/* ── Settings ────────────────────────────────────────────────────────────── */
+
+/* The frame is a fixed sub-rail beside a panel; below tablet the rail becomes
+   a scrollable strip so all eight remain reachable without a dropdown. */
+.rst-settings {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: var(--gap-section, 20px);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .rst-settings { grid-template-columns: minmax(0, 1fr); }
+  .rst-settings-nav { flex-direction: row; overflow-x: auto; padding-bottom: 4px; }
+  .rst-settings-tab { white-space: nowrap; }
+}
+
+.rst-settings-nav { display: flex; flex-direction: column; gap: 2px; }
+.rst-settings-tab {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; cursor: pointer; text-align: left;
+  border: 1px solid transparent; border-radius: var(--rst-r);
+  background: transparent; color: inherit; font-size: var(--rst-fs-sm);
+}
+.rst-settings-tab:hover { background: var(--rst-surface); }
+.rst-settings-tab.is-on {
+  border-color: var(--rst-brand);
+  color: var(--rst-brand);
+  background: var(--rst-brand-tint);
+  font-weight: 700;
+}
+/* Marks a section with no API behind it, so the gap is visible before you click. */
+.rst-settings-tab em { margin-left: auto; font-style: normal; color: var(--rst-warn); font-size: 18px; line-height: 1; }
+
+.rst-settings-body { min-width: 0; }
+.rst-sub { margin: 2px 0 14px; }
+.rst-h-sep { margin-top: 22px; }
+
+.rst-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 620px) { .rst-form-grid { grid-template-columns: minmax(0, 1fr); } }
+.rst-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+.rst-toggle {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--hairline, var(--rst-line)); cursor: pointer;
+}
+.rst-toggle span { display: flex; flex-direction: column; gap: 1px; }
+.rst-toggle strong { font-size: var(--rst-fs-sm); font-weight: 600; }
+.rst-toggle em { font-style: normal; font-size: var(--rst-fs-xs); opacity: .65; }
+
+.rst-people { display: flex; flex-direction: column; }
+.rst-people li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--hairline, var(--rst-line));
+}
+.rst-people li:last-child { border-bottom: 0; }
+.rst-person-name { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.rst-person-name strong { font-size: var(--rst-fs-sm); font-weight: 600; }
+.rst-person-name em { font-style: normal; font-size: var(--rst-fs-xs); opacity: .62; }
+
+.rst-notwired { display: flex; gap: 14px; align-items: flex-start; padding: 6px 0; }
+.rst-notwired > svg { color: var(--rst-warn); flex: none; margin-top: 2px; }
+.rst-notwired p { margin: 0 0 7px; }
+.rst-needs-label { margin-top: 10px !important; font-weight: 600; }
+.rst-needs { margin: 0 0 8px; padding-left: 18px; list-style: disc; }
+.rst-needs li { margin-bottom: 3px; }
+
+/* ── Captain order / review sheet ────────────────────────────────────────── */
+
+.rst-capt-title { display: flex; flex-direction: column; gap: 1px; }
+.rst-capt-title strong { font-size: var(--rst-fs-md); font-weight: 700; }
+.rst-capt-title span { font-size: var(--rst-fs-xs); opacity: .62; }
+
+/* Room for the persistent cart bar so the last row is never trapped under it. */
+.rst-capt-menu { padding-bottom: 96px; }
+.rst-capt-items { grid-template-columns: repeat(auto-fill, minmax(164px, 1fr)); }
+.rst-capt-items .rst-stepper button { width: 38px; height: 38px; }
+
+.rst-cartbar {
+  position: fixed; left: 16px; right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 12px;
+  min-height: 58px; padding: 0 18px;
+  border: 0; border-radius: var(--rst-r-pill);
+  background: var(--rst-brand); color: #fff;
+  font-size: var(--rst-fs-md); font-weight: 700; cursor: pointer;
+  box-shadow: 0 6px 22px rgba(19, 35, 118, .28);
+}
+.rst-cartbar-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 26px; height: 26px; padding: 0 7px;
+  border-radius: var(--rst-r-pill); background: rgba(255, 255, 255, .24);
+  font-size: var(--rst-fs-sm);
+}
+.rst-cartbar-total { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.rst-sheet {
+  position: fixed; inset: 0; z-index: 40;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(0, 0, 0, .38);
+}
+.rst-sheet-panel {
+  width: 100%; max-width: 620px; max-height: 92vh; overflow-y: auto;
+  background: var(--rst-bg); color: var(--rst-ink);
+  border-radius: var(--rst-r-lg) var(--rst-r-lg) 0 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.rst-sheet-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--rst-line);
+  position: sticky; top: 0; background: var(--rst-bg);
+}
+.rst-sheet-head strong { font-size: var(--rst-fs-md); font-weight: 700; }
+
+/* ── Modifier sheet + phone tab bar ──────────────────────────────────────── */
+
+.rst-sheet-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 18px; }
+.rst-sheet-foot {
+  position: sticky; bottom: 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--rst-line); background: var(--rst-bg);
+}
+.rst-addbtn { width: 100%; justify-content: center; min-height: 46px; font-size: var(--rst-fs-md); }
+
+.rst-modgroup { display: flex; flex-direction: column; gap: 8px; }
+.rst-modrow { display: flex; flex-wrap: wrap; gap: 8px; }
+.rst-modchip {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding: 0 14px; cursor: pointer;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r); background: var(--rst-surface); color: inherit;
+  font-size: var(--rst-fs-sm);
+}
+.rst-modchip.is-on { border-color: var(--rst-brand); background: var(--rst-brand-tint); color: var(--rst-brand); font-weight: 700; }
+.rst-modchip em { font-style: normal; font-size: var(--rst-fs-xs); opacity: .75; }
+
+.rst-noteinput {
+  width: 100%; min-height: 44px; padding: 0 12px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r); background: var(--rst-bg); color: inherit;
+  font-size: var(--rst-fs-sm);
+}
+.rst-modnote { margin-top: 2px; }
+
+.rst-stepper-lg button { width: 44px; height: 44px; font-size: 20px; }
+.rst-stepper-lg { max-width: 180px; }
+
+.rst-customise {
+  width: 30px; height: 30px; border-radius: var(--rst-r);
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  background: var(--rst-bg); color: var(--rst-ink-2); cursor: pointer;
+}
+.rst-customise:hover { color: var(--rst-brand); border-color: var(--rst-brand); }
+
+/* Bottom tabs are a PHONE navigation model — on a tablet or desktop the
+   platform sidebar is already present and a second nav would be noise. */
+.rst-tabbar { display: none; }
+@media (max-width: 560px) {
+  .rst-tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--rst-line);
+    background: var(--rst-bg);
+  }
+  .rst-tab {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 7px 4px; border-radius: var(--rst-r);
+    color: var(--rst-ink-2); text-decoration: none; font-size: 11px;
+  }
+  .rst-tab.is-on { color: var(--rst-brand); font-weight: 700; }
+  /* Clear the bar so the last row of any POS screen stays reachable. Scoped to
+     `.rst`: `.ds-page` is the shared page class on 56 other screens, and a
+     route's CSS stays in the document after client-side navigation. */
+  .rst.ds-page { padding-bottom: 88px; }
+}
+
+/* ── definition list, for drawer detail panes ────────────────────────────── */
+.rst-deflist { display: flex; flex-direction: column; gap: 2px; margin: 0; }
+.rst-deflist > div {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 10px 2px; border-bottom: 1px solid var(--ds-border-subtle, rgba(0,0,0,.06));
+}
+.rst-deflist > div:last-child { border-bottom: 0; }
+.rst-deflist dt { color: var(--ds-text-muted, #6b7280); font-size: 13px; }
+.rst-deflist dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+/* A note spans the row rather than trying to sit in the value column: it is a
+   paragraph explaining an absence, not a value. */
+.rst-deflist-note { flex-direction: column; align-items: flex-start; gap: 4px; }
+.rst-deflist-note dd { text-align: left; font-size: 13px; line-height: 1.5; color: var(--ds-text-muted, #6b7280); }
+
+/* ---------------------------------------------------------------------------
+   The `ResourcePage` drawer form, and the row switch beside it.
+
+   The switch exists because two domains change a boolean through a dedicated
+   endpoint rather than through their update contract: a cuisine's status can
+   ONLY be moved by `PATCH …/toggle-status`, so a checkbox in the form would
+   report success and change nothing.
+   --------------------------------------------------------------------------- */
+.rst-form { display: flex; flex-direction: column; gap: 14px; }
+
+.rst-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rst-field-label { font-size: var(--rst-fs-xs); font-weight: 600; opacity: .78; }
+.rst-field-label em { font-style: normal; color: var(--rst-brand); }
+.rst-field-hint { font-size: var(--rst-fs-xs); opacity: .6; line-height: 1.45; }
+
+.rst-field input[type='text'],
+.rst-field input[type='number'],
+.rst-field input[type='date'],
+.rst-field input[type='time'],
+.rst-field textarea,
+.rst-field select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg);
+  color: var(--rst-ink);
+  font-family: inherit;
+  font-size: var(--rst-fs-sm);
+}
+.rst-field textarea { resize: vertical; }
+.rst-field input:focus-visible,
+.rst-field textarea:focus-visible,
+.rst-field select:focus-visible {
+  outline: 2px solid var(--rst-brand); outline-offset: 1px; border-color: transparent;
+}
+/* A lone checkbox should not stretch to the field width. */
+.rst-field > input[type='checkbox'] { width: 16px; height: 16px; margin: 2px 0; }
+
+/* Closed vocabularies, all visible at once — the server rejects the whole
+   array on one bad member, so a hidden option is a hidden 422. */
+.rst-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.rst-check { display: flex; align-items: center; gap: 6px; font-size: var(--rst-fs-sm); }
+.rst-check input { width: 15px; height: 15px; }
+
+.rst-formerror {
+  padding: 10px 12px; margin-bottom: 14px;
+  border: 1px solid var(--rst-brand);
+  border-radius: var(--rst-r);
+  /* Mixed rather than the flat --rst-brand-tint: the tint is a light-mode
+     pink and the dark variant keeps the brand hue while swapping neutrals. */
+  background: color-mix(in srgb, var(--rst-brand) 10%, transparent);
+  color: var(--rst-brand);
+  font-size: var(--rst-fs-sm); line-height: 1.5;
+}
+.rst-danger { color: var(--rst-brand); }
+
+.rst-switch {
+  width: 38px; height: 22px; padding: 0; flex: none;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: 999px;
+  background: var(--rst-surface, #eceff1);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.rst-switch.is-on { background: var(--rst-brand); border-color: var(--rst-brand); }
+.rst-switch:disabled { opacity: .5; cursor: progress; }
+.rst-switch:focus-visible { outline: 2px solid var(--rst-brand); outline-offset: 2px; }
+.rst-switch-knob {
+  display: block; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  transform: translateX(2px);
+  transition: transform .15s ease;
+}
+.rst-switch.is-on .rst-switch-knob { transform: translateX(18px); }
+
+/* Repeating rows for a nested array field — a purchase's line items. */
+.rst-lines { display: flex; flex-direction: column; gap: 6px; }
+.rst-line {
+  display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px; align-items: center;
+}
+.rst-line-head {
+  font-size: var(--rst-fs-xs); font-weight: 600; opacity: .7;
+  padding-bottom: 2px; border-bottom: 1px solid var(--hairline, var(--rst-line));
+}
+.rst-line input, .rst-line select {
+  width: 100%; padding: 7px 9px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg); color: var(--rst-ink);
+  font-family: inherit; font-size: var(--rst-fs-sm);
+}
+@media (max-width: 620px) {
+  .rst-line { grid-template-columns: minmax(0, 1fr); }
+  .rst-line-head { display: none; }
+}
+
+/* Grouped multiselect — a role's 275 permissions, by prefix. */
+.rst-checkgroups {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 340px; overflow-y: auto;
+  padding: 10px; border: 1px solid var(--hairline, var(--rst-line));
+  border-radius: var(--rst-r); background: var(--rst-surface);
+}
+.rst-checkgroup { display: flex; flex-direction: column; gap: 4px; }
+.rst-checkgroup-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: var(--rst-fs-xs); text-transform: uppercase; letter-spacing: .04em; opacity: .75;
+}
+
+/* List search and pager — every Laravel list screen has both. */
+.rst-listsearch {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 11px; margin-bottom: 12px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg);
+}
+.rst-listsearch svg { flex: none; opacity: .55; }
+.rst-listsearch input {
+  flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+  color: var(--rst-ink); font-family: inherit; font-size: var(--rst-fs-sm);
+}
+.rst-listsearch-count { flex: none; font-size: var(--rst-fs-xs); opacity: .6; }
+
+.rst-pager {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 2px 0;
+}
+.rst-pager-at { font-size: var(--rst-fs-xs); opacity: .7; }
+
+/* The order register's filter row — search, four selects and a date range. */
+.rst-filterbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  margin-top: 10px;
+}
+.rst-filterbar input, .rst-filterbar select {
+  padding: 7px 10px;
+  border: 1px solid var(--hairline-strong, var(--rst-line));
+  border-radius: var(--rst-r);
+  background: var(--rst-bg); color: var(--rst-ink);
+  font-family: inherit; font-size: var(--rst-fs-sm);
+}
+.rst-filterbar input[type='search'] { flex: 1 1 220px; min-width: 0; }
+@media (max-width: 720px) {
+  .rst-filterbar > * { flex: 1 1 100%; }
+}

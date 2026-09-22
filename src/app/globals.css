@@ -1,0 +1,302 @@
+@import url("https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Orbitron:wght@600;700&display=swap");
+
+/* Product design system — type scale, spacing, elevation, status tones.
+   It only references the brand tokens below; var() resolves at use time,
+   so import order does not matter here. */
+@import "./design-system.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   BMN Connect — brand tokens
+   ============================================================ */
+:root {
+  --font: "Geist", "Manrope", system-ui, -apple-system, sans-serif;
+  --mono: "Inter", "SF Mono", ui-monospace, monospace;
+
+  --bg: #faf8f6;
+  --surface: #ffffff;
+  --surface-2: #f5f1ed;
+  --surface-3: #f6f7f9;
+  --ink: #3a2f2a;
+  --ink-2: #6b6260;
+  /* 0.69 is the measured minimum that clears WCAG AA (4.5:1) on both
+     --surface and --surface-2. At the previous 0.5 it composited to
+     2.88:1 — every caption and timestamp in the product failed. */
+  --ink-3: rgba(58, 47, 42, 0.69);
+  --line: rgba(58, 47, 42, 0.14);
+  --line-soft: rgba(58, 47, 42, 0.08);
+  --navy: #132376;
+  --navy-900: #0d1854;
+  --gold: #e6a23c;
+  --gold-bg: #fef9f1;
+  /* The foreground for anything sitting ON --gold-bg, text or icon. Brand
+     --gold is 2.09:1 there — it fails even the 3:1 bar for graphics. This
+     clears 4.5:1, so --gold stays the pure brand colour for solid fills. */
+  --gold-ink: #9d681b;
+  --success: #008532;  /* was #00a63e — 3.08:1 on --success-bg, below AA */
+  --success-bg: #f0fdf4;
+  --danger: #e2000b;   /* was #e7000b — 4.36:1 on --danger-bg, just under AA */
+  --danger-bg: #fef2f2;
+  --shadow-1: 0 1px 2px rgba(58, 47, 42, 0.05);
+  --shadow-2: 0 6px 18px rgba(58, 47, 42, 0.08);
+  --shadow-3: 0 18px 44px rgba(58, 47, 42, 0.12);
+
+  /* Dark sidebar surfaces (constant across themes) */
+  --sb: #241d19;
+  --sb-2: #1c1612;
+  --sb-ink: #f1ece7;
+  --sb-ink-2: #a99e97;
+  --sb-active: rgba(255, 255, 255, 0.07);
+  --sb-line: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg: #16110e;
+  --surface: #1f1814;
+  --surface-2: #2a211c;
+  --surface-3: #211a15;
+  --ink: #f3eee9;
+  --ink-2: #b7aba3;
+  /* 0.51 measured minimum for AA on the dark surfaces (was 4.04:1). */
+  --ink-3: rgba(243, 238, 233, 0.53);
+  --line: rgba(243, 238, 233, 0.12);
+  --line-soft: rgba(243, 238, 233, 0.06);
+  --navy: #5566d6;
+  --navy-900: #3e4fb8;
+  --gold: #ecb45c;
+  --gold-bg: rgba(236, 180, 92, 0.1);
+  --gold-ink: #ecb45c;
+  --success: #3dd17e;
+  --success-bg: rgba(61, 209, 126, 0.12);
+  --danger: #ff5c63;
+  --danger-bg: rgba(255, 92, 99, 0.1);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 6px 18px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 18px 44px rgba(0, 0, 0, 0.5);
+  --sb: #120d0a;
+  --sb-2: #0c0907;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(19, 35, 118, 0.18);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+  background-clip: padding-box;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink-3);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes livepulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Component primitives
+   ============================================================ */
+@layer components {
+  /* Controls are flat and quiet. A solid fill and a faint hairline do the
+     work — the glow shadows and outlined pills we had before were the
+     single biggest reason the app read as Bootstrap. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3.5 text-[13px] font-semibold transition disabled:cursor-not-allowed disabled:opacity-45;
+    height: 36px;
+    border-radius: var(--r-control);
+    letter-spacing: -0.005em;
+  }
+
+  .btn-lg {
+    height: 42px;
+    @apply px-5 text-[13.5px];
+  }
+
+  .btn-sm {
+    height: 30px;
+    @apply px-3 text-[12.5px];
+  }
+
+  .btn-primary {
+    @apply btn text-white;
+    background: var(--navy);
+    border: 1px solid transparent;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: var(--navy-900);
+  }
+
+  .btn-secondary {
+    @apply btn;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--hairline-strong);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--surface-2);
+    border-color: var(--line);
+  }
+
+  .btn-ghost {
+    @apply btn;
+    color: var(--ink-2);
+    background: transparent;
+    border: 1px solid transparent;
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+
+  .btn-danger {
+    @apply btn text-white;
+    background: var(--danger);
+    border: 1px solid transparent;
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+  }
+
+  .input {
+    @apply w-full px-3 text-[13.5px] outline-none transition;
+    height: 36px;
+    border-radius: var(--r-control);
+    border: 1px solid var(--hairline-strong);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .input-lg {
+    height: 42px;
+  }
+
+  .input:hover:not(:focus) {
+    border-color: var(--line);
+  }
+
+  .input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(19, 35, 118, 0.1);
+  }
+
+  textarea.input {
+    height: auto;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  select.input {
+    height: 42px;
+  }
+
+  .label {
+    @apply mb-1.5 block;
+    font-size: 12px;
+    font-weight: 560;
+    color: var(--ink-2);
+  }
+
+  /* Hairline, no shadow — cards separate by their ground, not a box. */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-card);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5;
+    font-size: 11.5px;
+    font-weight: 620;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+}

@@ -1,0 +1,1785 @@
+/* ============================================================
+   BMN Connect — design system (Phase 6.5)
+
+   Reference language: Attio / Linear / Stripe. The lesson from those
+   products is restraint, not decoration:
+
+     · Cards are white on a faintly tinted ground with a hairline.
+       They do NOT carry a shadow — elevation is reserved for things
+       that genuinely float (drawer, command palette, dragged card).
+     · Hierarchy comes from type size and weight, not from borders.
+       Headings are large and calm; metadata is small and muted.
+     · Colour means status. A 6px dot usually says it better than a
+       filled pill.
+
+   Screens should reach for these variables and classes rather than
+   inventing inline pixel values — that drift is what made the app
+   read as an internal CRUD tool.
+   ============================================================ */
+
+:root {
+  /* --- type scale -------------------------------------------------
+     Deliberately wide. The old UI lived entirely between 11 and 14px,
+     so nothing could lead. Greeting/display carries the page, caption
+     carries labels, and the distance between them does the work. */
+  /* Spec: 36 page heading · 28 section · 22 card number · 16 body · 14 helper · 12 metadata.
+     Adopted with one deliberate deviation: body sits at 14 rather than 16. This is a dense
+     operational CRM — Attio, the primary reference, sets body at 13–14 — and 16px body would
+     cost roughly a fifth of the rows visible in a claims queue. Helper/metadata follow at 13/12. */
+  --t-greeting: 34px;
+  --t-display: 28px;
+  --t-h1: 22px;
+  --t-h2: 16px;
+  --t-h3: 14px;
+  --t-body: 14px;
+  --t-small: 13px;
+  --t-caption: 12px;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.55;
+
+  --tr-display: -0.028em;
+  --tr-heading: -0.015em;
+  --tr-caption: 0.04em;
+
+  /* --- spacing ----------------------------------------------------
+     One scale, used everywhere. Card padding 18-22, section gaps
+     20-28; anything tighter is what made the old screens cramped. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 40px;
+  --s-9: 56px;
+
+  --pad-card: 20px;
+  --gap-section: 22px;
+  --pad-page: 30px;
+
+  /* --- radius -----------------------------------------------------
+     Modest. Pills are for status only; everything else is a soft
+     rectangle. Over-rounding is what reads as Bootstrap. */
+  --r-sm: 7px;
+  --r-control: 9px;
+  --r-card: 12px;
+  --r-panel: 16px;
+  --r-pill: 999px;
+
+  /* --- elevation --------------------------------------------------
+     Almost nothing at rest. --e-float is for overlays only. */
+  --e-none: none;
+  --e-hover: 0 1px 2px rgba(58, 47, 42, 0.05), 0 6px 16px -6px rgba(58, 47, 42, 0.1);
+  --e-raised: 0 1px 2px rgba(58, 47, 42, 0.05), 0 10px 24px -8px rgba(58, 47, 42, 0.14);
+  --e-float: 0 8px 16px -6px rgba(58, 47, 42, 0.1), 0 24px 56px -16px rgba(58, 47, 42, 0.22);
+
+  /* Borders carry the structure, so they must be faint but present. */
+  --hairline: rgba(58, 47, 42, 0.09);
+  --hairline-soft: rgba(58, 47, 42, 0.055);
+  --hairline-strong: rgba(58, 47, 42, 0.16);
+
+  /* --- semantic status tones --------------------------------------
+     Colour carries meaning only. Green active, amber renewal,
+     red expired/overdue, purple claims, blue sales, navy info. */
+  --tone-active: #0b7a41;  /* darkened: 4.02 -> AA on --tone-active-bg */
+  --tone-active-bg: #ecf7f0;
+  --tone-active-line: rgba(15, 138, 74, 0.2);
+
+  --tone-renewal: #9a5a0c;  /* darkened: 3.88 -> AA on --tone-renewal-bg */
+  --tone-renewal-bg: #fdf4e8;
+  --tone-renewal-line: rgba(180, 105, 14, 0.2);
+
+  --tone-expired: #c02626;
+  --tone-expired-bg: #fdeeee;
+  --tone-expired-line: rgba(192, 38, 38, 0.18);
+
+  --tone-claim: #6d3bc4;
+  --tone-claim-bg: #f3effc;
+  --tone-claim-line: rgba(109, 59, 196, 0.18);
+
+  --tone-sales: #1a56c4;
+  --tone-sales-bg: #ebf2fd;
+  --tone-sales-line: rgba(26, 86, 196, 0.18);
+
+  --tone-info: #132376;
+  --tone-info-bg: #eef0fa;
+  --tone-info-line: rgba(19, 35, 118, 0.16);
+
+  --tone-neutral: #6b6260;
+  --tone-neutral-bg: #f4f1ed;
+  --tone-neutral-line: rgba(58, 47, 42, 0.1);
+}
+
+[data-theme='dark'] {
+  --e-hover: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px -6px rgba(0, 0, 0, 0.5);
+  --e-raised: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 24px -8px rgba(0, 0, 0, 0.55);
+  --e-float: 0 8px 16px -6px rgba(0, 0, 0, 0.5), 0 24px 56px -16px rgba(0, 0, 0, 0.65);
+
+  --hairline: rgba(243, 238, 233, 0.1);
+  --hairline-soft: rgba(243, 238, 233, 0.06);
+  --hairline-strong: rgba(243, 238, 233, 0.18);
+
+  /* Lifted and desaturated so they sit on a dark ground without glowing. */
+  --tone-active: #4ed489;
+  --tone-active-bg: rgba(78, 212, 137, 0.12);
+  --tone-active-line: rgba(78, 212, 137, 0.26);
+
+  --tone-renewal: #f0b45c;
+  --tone-renewal-bg: rgba(240, 180, 92, 0.12);
+  --tone-renewal-line: rgba(240, 180, 92, 0.26);
+
+  --tone-expired: #ff7a80;
+  --tone-expired-bg: rgba(255, 122, 128, 0.12);
+  --tone-expired-line: rgba(255, 122, 128, 0.24);
+
+  --tone-claim: #b596f0;
+  --tone-claim-bg: rgba(181, 150, 240, 0.13);
+  --tone-claim-line: rgba(181, 150, 240, 0.26);
+
+  --tone-sales: #7aa5f5;
+  --tone-sales-bg: rgba(122, 165, 245, 0.12);
+  --tone-sales-line: rgba(122, 165, 245, 0.26);
+
+  --tone-info: #8494ea;
+  --tone-info-bg: rgba(132, 148, 234, 0.12);
+  --tone-info-line: rgba(132, 148, 234, 0.26);
+
+  --tone-neutral: #b7aba3;
+  --tone-neutral-bg: rgba(243, 238, 233, 0.07);
+  --tone-neutral-line: rgba(243, 238, 233, 0.12);
+}
+
+/* ============================================================
+   Typography
+   ============================================================ */
+.ds-greeting {
+  font-size: var(--t-greeting);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: var(--tr-display);
+  color: var(--ink);
+  text-wrap: balance;
+  margin: 0;
+}
+
+.ds-display {
+  font-size: var(--t-display);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.ds-h1 {
+  font-size: var(--t-h1);
+  font-weight: 680;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-heading);
+  color: var(--ink);
+  text-wrap: balance;
+  margin: 0;
+}
+
+.ds-h2 {
+  font-size: var(--t-h2);
+  font-weight: 640;
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-heading);
+  color: var(--ink);
+  margin: 0;
+}
+
+.ds-h3 {
+  font-size: var(--t-h3);
+  font-weight: 620;
+  line-height: var(--lh-snug);
+  color: var(--ink);
+  margin: 0;
+}
+
+.ds-body {
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+}
+
+.ds-small {
+  font-size: var(--t-small);
+  line-height: var(--lh-snug);
+  color: var(--ink-2);
+}
+
+/* Section labels: sentence case and muted reads calmer than shouty
+   uppercase. Use ds-caption-upper only for dense data headers. */
+.ds-caption {
+  font-size: var(--t-caption);
+  font-weight: 500;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
+.ds-caption-upper {
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.3;
+}
+
+.ds-num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+.ds-muted {
+  color: var(--ink-3);
+}
+
+/* Quiet trailing affordance: "View all →" */
+.ds-viewall {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--t-small);
+  font-weight: 560;
+  color: var(--ink-3);
+  background: none;
+  border: 0;
+  padding: 2px;
+  cursor: pointer;
+  transition: color 130ms ease;
+}
+
+.ds-viewall:hover {
+  color: var(--ink);
+}
+
+/* ============================================================
+   Surfaces — hairline, not shadow
+   ============================================================ */
+.ds-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  box-shadow: var(--e-none);
+  padding: var(--pad-card);
+}
+
+.ds-card-tight {
+  padding: var(--s-3);
+}
+
+.ds-card-flush {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Cards that open something. The lift is the affordance — and it only
+   appears on hover, so a resting grid stays perfectly flat. */
+.ds-card-interactive {
+  cursor: pointer;
+  transition: box-shadow 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.ds-card-interactive:hover {
+  box-shadow: var(--e-hover);
+  border-color: var(--hairline-strong);
+}
+
+.ds-panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+  box-shadow: var(--e-float);
+}
+
+.ds-inset {
+  background: var(--surface-2);
+  border-radius: var(--r-control);
+}
+
+.ds-divider {
+  height: 1px;
+  background: var(--hairline-soft);
+  border: 0;
+  margin: 0;
+}
+
+/* Tinted rounded-square icon, one per entity kind — the reference
+   products use these to make dense lists scannable at a glance. */
+.ds-entity-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex: none;
+  color: var(--tone-neutral);
+  background: var(--tone-neutral-bg);
+}
+
+.ds-entity-icon-lg {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+
+/* ============================================================
+   Status: a dot first, a pill only when it must stand alone
+   ============================================================ */
+.ds-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+  background: currentColor;
+  display: inline-block;
+}
+
+.ds-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--t-small);
+  font-weight: 560;
+  white-space: nowrap;
+}
+
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2.5px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-caption);
+  font-weight: 620;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.ds-badge-dot::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.ds-tone-active {
+  color: var(--tone-active);
+  background: var(--tone-active-bg);
+  border-color: var(--tone-active-line);
+}
+
+.ds-tone-renewal {
+  color: var(--tone-renewal);
+  background: var(--tone-renewal-bg);
+  border-color: var(--tone-renewal-line);
+}
+
+.ds-tone-expired {
+  color: var(--tone-expired);
+  background: var(--tone-expired-bg);
+  border-color: var(--tone-expired-line);
+}
+
+.ds-tone-claim {
+  color: var(--tone-claim);
+  background: var(--tone-claim-bg);
+  border-color: var(--tone-claim-line);
+}
+
+.ds-tone-sales {
+  color: var(--tone-sales);
+  background: var(--tone-sales-bg);
+  border-color: var(--tone-sales-line);
+}
+
+.ds-tone-info {
+  color: var(--tone-info);
+  background: var(--tone-info-bg);
+  border-color: var(--tone-info-line);
+}
+
+.ds-tone-neutral {
+  color: var(--tone-neutral);
+  background: var(--tone-neutral-bg);
+  border-color: var(--tone-neutral-line);
+}
+
+/* Text-only tone (for dots and inline status, no chip background) */
+.ds-fg-active {
+  color: var(--tone-active);
+}
+
+.ds-fg-renewal {
+  color: var(--tone-renewal);
+}
+
+.ds-fg-expired {
+  color: var(--tone-expired);
+}
+
+.ds-fg-claim {
+  color: var(--tone-claim);
+}
+
+.ds-fg-sales {
+  color: var(--tone-sales);
+}
+
+.ds-fg-info {
+  color: var(--tone-info);
+}
+
+.ds-fg-neutral {
+  color: var(--tone-neutral);
+}
+
+/* ============================================================
+   Layout helpers
+   ============================================================ */
+.ds-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-section);
+  padding: var(--pad-page);
+  max-width: 1400px;
+}
+
+.ds-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.ds-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.ds-grid {
+  display: grid;
+  gap: var(--s-3);
+}
+
+/* 180px keeps a four-KPI row on one line next to the sidebar; at 200px the
+   fourth card wrapped onto a row of its own and the strip looked unbalanced. */
+.ds-grid-kpi {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ds-grid-cards {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* A list row inside a card: name left, muted metadata right. */
+.ds-list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.ds-list-row:last-child {
+  border-bottom: 0;
+}
+
+.ds-list-row-meta {
+  margin-left: auto;
+  font-size: var(--t-small);
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ds-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --pad-page: 16px;
+    --pad-card: 16px;
+    --t-greeting: 26px;
+    --t-display: 24px;
+    --t-h1: 20px;
+  }
+
+  .ds-grid-kpi,
+  .ds-grid-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Real navigation, not floating pills.
+   A sub-nav reads as structure: a rail with an active underline,
+   sitting on the page's own ground, with optional inline counts.
+   ============================================================ */
+.ds-subnav {
+  display: flex;
+  gap: var(--s-5);
+  border-bottom: 1px solid var(--hairline);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.ds-subnav::-webkit-scrollbar {
+  display: none;
+}
+
+.ds-subnav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 2px 10px;
+  font-size: var(--t-body);
+  font-weight: 560;
+  color: var(--ink-3);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 140ms ease;
+}
+
+.ds-subnav-item:hover {
+  color: var(--ink-2);
+}
+
+.ds-subnav-item[aria-current='true'],
+.ds-subnav-item[data-active='true'] {
+  color: var(--ink);
+  font-weight: 620;
+}
+
+.ds-subnav-item[aria-current='true']::after,
+.ds-subnav-item[data-active='true']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--navy);
+}
+
+/* Inline count beside a tab label — "Claims 3" */
+.ds-count {
+  font-size: 11px;
+  font-weight: 620;
+  color: var(--ink-3);
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  padding: 1px 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Data tables — kept only where data is genuinely tabular,
+   made calm: no outer grid, hoverable rows, tabular numerics.
+   ============================================================ */
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--t-body);
+}
+
+.ds-table th {
+  text-align: left;
+  padding: 0 var(--s-3) var(--s-2);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+
+.ds-table td {
+  padding: 11px var(--s-3);
+  border-bottom: 1px solid var(--hairline-soft);
+  color: var(--ink);
+  vertical-align: middle;
+}
+
+.ds-table tbody tr {
+  transition: background 120ms ease;
+}
+
+.ds-table tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.ds-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ds-table .ds-col-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.015em;
+}
+
+/* ============================================================
+   Focus: always visible, never a default browser ring
+   ============================================================ */
+.ds-card-interactive:focus-visible,
+.ds-subnav-item:focus-visible,
+.ds-viewall:focus-visible,
+.ds-badge:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .ds-card-interactive,
+  .ds-subnav-item,
+  .ds-viewall,
+  .ds-table tbody tr {
+    transition: none;
+  }
+}
+
+/* ============================================================
+   Data table — sticky header, sortable columns, clickable rows.
+   Extends .ds-table above; the wrapper owns the horizontal scroll
+   so the page body never scrolls sideways.
+   ============================================================ */
+.ds-table-wrap {
+  /* Sticky headers need a scroll context. --ds-table-max-h lets a caller
+     cap the body height; unset, the table scrolls with the page and the
+     header pins to the top of the app scroller. */
+  max-height: var(--ds-table-max-h, none);
+  overflow-y: auto;
+}
+
+.ds-table-sticky thead th {
+  position: sticky;
+  top: var(--ds-table-sticky-top, 0px);
+  z-index: 2;
+  background: var(--surface);
+  /* th borders don't paint reliably when stuck, so the hairline is a shadow. */
+  box-shadow: inset 0 -1px 0 var(--hairline);
+  border-bottom: 0;
+  padding-top: var(--s-2);
+}
+
+.ds-table-dense td {
+  padding: 6px var(--s-3);
+}
+
+.ds-table-dense th {
+  padding-bottom: 6px;
+}
+
+/* The whole header cell is the sort target — bigger than a caret. */
+.ds-th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.ds-th-sort:hover {
+  color: var(--ink);
+}
+
+.ds-th-sort:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Unsorted columns keep the caret slot reserved so headers don't jump. */
+.ds-sort-caret {
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.ds-th-sort:hover .ds-sort-caret,
+.ds-th-sort[data-sorted='true'] .ds-sort-caret {
+  opacity: 1;
+}
+
+.ds-th-sort[data-sorted='true'] {
+  color: var(--ink);
+}
+
+.ds-table [align='right'],
+.ds-table th.ds-col-num {
+  text-align: right;
+}
+
+.ds-table tbody tr.ds-row-click {
+  cursor: pointer;
+}
+
+.ds-table tbody tr.ds-row-click:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
+}
+
+.ds-table-empty {
+  padding: var(--s-7) var(--s-4);
+  text-align: center;
+  color: var(--ink-3);
+  font-size: var(--t-small);
+}
+
+/* ============================================================
+   Filter chips — multi-select, not stacked dropdowns.
+   Selected chips take a tone tint; the row wraps freely.
+   ============================================================ */
+.ds-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.ds-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.ds-chip-group-label {
+  font-size: var(--t-caption);
+  font-weight: 560;
+  color: var(--ink-3);
+  margin-right: 2px;
+  white-space: nowrap;
+}
+
+.ds-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--t-small);
+  font-weight: 540;
+  line-height: 1.3;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 130ms ease, border-color 130ms ease, color 130ms ease;
+}
+
+.ds-chip:hover {
+  border-color: var(--hairline-strong);
+  color: var(--ink);
+}
+
+/* Selected chips take the option's tone. These need two classes because the
+   base .ds-chip rule is declared after the .ds-tone-* block above and would
+   otherwise win on source order. */
+.ds-chip[aria-pressed='true'] {
+  font-weight: 620;
+  color: var(--ink);
+  background: var(--surface-2);
+  border-color: var(--hairline-strong);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-active {
+  color: var(--tone-active);
+  background: var(--tone-active-bg);
+  border-color: var(--tone-active-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-renewal {
+  color: var(--tone-renewal);
+  background: var(--tone-renewal-bg);
+  border-color: var(--tone-renewal-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-expired {
+  color: var(--tone-expired);
+  background: var(--tone-expired-bg);
+  border-color: var(--tone-expired-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-claim {
+  color: var(--tone-claim);
+  background: var(--tone-claim-bg);
+  border-color: var(--tone-claim-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-sales {
+  color: var(--tone-sales);
+  background: var(--tone-sales-bg);
+  border-color: var(--tone-sales-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-info {
+  color: var(--tone-info);
+  background: var(--tone-info-bg);
+  border-color: var(--tone-info-line);
+}
+
+.ds-chip[aria-pressed='true'].ds-tone-neutral {
+  color: var(--tone-neutral);
+  background: var(--tone-neutral-bg);
+  border-color: var(--tone-neutral-line);
+}
+
+.ds-chip:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* The count sits quieter than the label and never reflows the chip. */
+.ds-chip-count {
+  font-size: 11px;
+  font-weight: 620;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.62;
+}
+
+.ds-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: var(--s-1);
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  border-radius: var(--r-sm);
+  color: var(--ink-3);
+  font-size: var(--t-small);
+  font-weight: 560;
+  cursor: pointer;
+  transition: color 130ms ease;
+}
+
+.ds-chip-clear:hover {
+  color: var(--ink);
+}
+
+.ds-chip-clear:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   Command palette — the one place elevation is unambiguous.
+   Two panes on desktop (results + preview), one under 720px.
+   ============================================================ */
+.ds-cmdk-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 11vh var(--s-5) var(--s-5);
+  background: rgba(28, 22, 18, 0.34);
+  backdrop-filter: blur(2px);
+  animation: dsCmdkFade 130ms ease;
+}
+
+.ds-cmdk {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 840px;
+  max-height: 66vh;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+  /* It genuinely floats, so it is one of the few things that may. */
+  box-shadow: var(--e-float);
+  animation: dsCmdkIn 170ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.ds-cmdk-search {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0 var(--s-4);
+  height: 54px;
+  flex: none;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink-3);
+}
+
+.ds-cmdk-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--t-h2);
+  font-family: inherit;
+}
+
+.ds-cmdk-input::placeholder {
+  color: var(--ink-3);
+}
+
+.ds-cmdk-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.ds-cmdk-results {
+  flex: 0 0 46%;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--s-2) var(--s-2) var(--s-3);
+  border-right: 1px solid var(--hairline-soft);
+}
+
+.ds-cmdk-preview {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: var(--s-5);
+  background: var(--surface-2);
+}
+
+.ds-cmdk-group-label {
+  padding: var(--s-3) var(--s-3) var(--s-1);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.ds-cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: var(--t-body);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Highlight follows the keyboard, so it is driven by data-active, not :hover. */
+.ds-cmdk-item[data-active='true'] {
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 560;
+}
+
+.ds-cmdk-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-cmdk-item-hint {
+  margin-left: auto;
+  flex: none;
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.ds-cmdk-empty {
+  padding: var(--s-7) var(--s-4);
+  text-align: center;
+  color: var(--ink-3);
+  font-size: var(--t-small);
+}
+
+.ds-cmdk-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  flex: none;
+  padding: 9px var(--s-4);
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.ds-cmdk-foot-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.ds-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* The topbar's search control: looks like an input, behaves as the
+   palette trigger. One search affordance, not two. */
+.ds-topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 42px;
+  padding: 0 10px 0 14px;
+  border: 1px solid var(--line, var(--hairline));
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: var(--t-body);
+  font-family: inherit;
+  text-align: left;
+  cursor: text;
+  transition: border-color 130ms ease;
+}
+
+.ds-topbar-search:hover {
+  border-color: var(--hairline-strong);
+}
+
+.ds-topbar-search:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.ds-topbar-search-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-topbar-search .ds-kbd {
+  margin-left: auto;
+  flex: none;
+}
+
+@keyframes dsCmdkIn {
+  from {
+    transform: translateY(-8px) scale(0.985);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes dsCmdkFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 720px) {
+
+  /* Single pane: the preview is the first thing to go. */
+  .ds-cmdk-preview {
+    display: none;
+  }
+
+  .ds-cmdk-results {
+    flex: 1;
+    border-right: 0;
+  }
+
+  .ds-cmdk-scrim {
+    padding: var(--s-4) var(--s-3);
+  }
+
+  .ds-cmdk {
+    max-height: 82vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .ds-cmdk,
+  .ds-cmdk-scrim {
+    animation: none;
+  }
+
+  .ds-chip,
+  .ds-th-sort,
+  .ds-sort-caret,
+  .ds-chip-clear,
+  .ds-topbar-search {
+    transition: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VERTICAL PAGE FRAME
+
+   A page header that answers "where am I" before "what is this screen".
+
+   Built for hospitality first, where a receptionist may operate one of several
+   properties and being wrong about which is an operational error, not a
+   cosmetic one. Every multi-tenant vertical has the same question, so these are
+   ds- primitives rather than hotel-specific: restaurant, clinic and coworking
+   inherit the frame instead of each inventing a header.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.ds-pagehead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+}
+
+.ds-pagehead-main { min-width: 0; }
+
+.ds-pagehead-sub {
+  margin-top: var(--s-1);
+  margin-bottom: 0;
+}
+
+.ds-pagehead-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+}
+
+/* The workspace context: which property/branch/site this screen is showing.
+   Reads above the page title because it qualifies everything below it. */
+.ds-context {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--ink-2);
+  margin-bottom: var(--s-1);
+}
+
+.ds-context-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--t-h3);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+}
+
+/* The native select carries the interaction and the accessible name; the span
+   underneath carries the styling. Keeping the real control rather than
+   rebuilding one in divs means keyboard, screen readers and mobile pickers all
+   work without being re-implemented. */
+.ds-context-switch { position: relative; display: inline-flex; align-items: center; }
+
+.ds-context-switch select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ds-context-switch:hover .ds-context-name,
+.ds-context-switch:focus-within .ds-context-name { color: var(--ink); }
+
+.ds-context-switch:focus-within {
+  outline: 2px solid var(--tone-info);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
+}
+
+/* A titled block inside a page. */
+.ds-section { padding: var(--pad-card); }
+
+.ds-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-4);
+}
+
+.ds-section-head .ds-h3 { margin: 0; }
+
+.ds-section-tools { flex-wrap: wrap; }
+
+/* Two columns on a desk, one on a phone — without each screen picking its own
+   breakpoint. */
+.ds-split {
+  display: grid;
+  gap: var(--s-4);
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+}
+
+@media (max-width: 640px) {
+  .ds-pagehead { flex-direction: column; align-items: stretch; }
+  .ds-pagehead-actions { width: 100%; }
+  .ds-pagehead-actions > * { flex: 1 1 auto; }
+  .ds-split { grid-template-columns: 1fr; }
+}
+
+/* ── Form flow ────────────────────────────────────────────────────────────
+   A modal built as labelled steps rather than a wall of fields. Sections carry
+   the order the person is thinking in; the pair grid keeps naturally-adjacent
+   fields adjacent without each form inventing a breakpoint. */
+
+.ds-formflow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.ds-formflow > section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.ds-formflow > section > h4 {
+  margin: 0;
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.ds-field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-3);
+}
+
+
+
+@media (max-width: 640px) {
+  .ds-field-pair { grid-template-columns: 1fr; }
+}
+
+/* ── Projected balance ────────────────────────────────────────────────────
+   Posted money and projected money on one card, visibly different weights, so
+   a receptionist can quote the second without believing it is the first. */
+
+.hs-projection {
+  margin: var(--s-3) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  font-size: var(--t-caption);
+}
+
+.hs-projection > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+}
+
+.hs-projection dt { margin: 0; opacity: .85; }
+.hs-projection dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+.hs-projection-note {
+  display: block !important;
+  margin-top: var(--s-1);
+  padding-top: var(--s-1);
+  border-top: 1px solid currentColor;
+  opacity: .7;
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FULL-SCREEN BOOKING FLOW
+
+   The anatomy the coworking desk flow arrived at: steps across the top, the
+   schedule on the left, the FLOOR in the middle, the money on the right.
+   Choosing a place deserves the screen — a room is not a dropdown option.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hs-flow {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-2);
+}
+
+.hs-flow-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  padding: var(--s-4) var(--s-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.hs-flow-head > :last-child { margin-left: auto; }
+
+.hs-steps {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hs-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.hs-step-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 99px;
+  border: 1.5px solid var(--hairline-strong);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hs-steps li.is-current { color: var(--ink); font-weight: 600; }
+.hs-steps li.is-current .hs-step-n {
+  border-color: var(--tone-sales);
+  background: var(--tone-sales);
+  color: var(--surface);
+}
+.hs-steps li.is-done { color: var(--tone-active); }
+.hs-steps li.is-done .hs-step-n {
+  border-color: var(--tone-active);
+  color: var(--tone-active);
+}
+
+.hs-flow-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr) 320px;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-6);
+  overflow: hidden;
+}
+
+.hs-flow-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  overflow-y: auto;
+}
+
+.hs-flow-floor {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-panel);
+}
+
+.hs-floor-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-5);
+  border-bottom: 1px solid var(--hairline-soft);
+}
+
+.hs-floor-canvas {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-5) var(--s-5) var(--s-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+
+.hs-floor-row { display: flex; flex-direction: column; gap: var(--s-3); }
+
+/* Doors along a corridor. auto-fill so 11 rooms and 40 both lay out sensibly
+   without the screen picking a column count. */
+.hs-floor-grid {
+  display: grid;
+  gap: var(--s-4) var(--s-3);
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+}
+
+.hs-floor-legend {
+  position: absolute;
+  left: var(--s-4);
+  bottom: var(--s-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  font-size: var(--t-caption);
+  box-shadow: var(--e-float);
+}
+
+.hs-floor-legend span { display: inline-flex; align-items: center; gap: var(--s-2); }
+
+.hs-key {
+  width: 13px;
+  height: 17px;
+  border-radius: 3px 3px 1px 1px;
+  display: inline-block;
+}
+.hs-key-free    { background: var(--surface); border: 2px solid var(--tone-active-line); }
+.hs-key-taken   { background: var(--tone-info-bg); border: 1px solid var(--tone-info-line); }
+.hs-key-dirty   { background: var(--tone-renewal-bg); border: 1.5px dashed var(--tone-renewal-line); }
+.hs-key-blocked { background: var(--surface-2); border: 1px solid var(--hairline-strong); }
+
+.hs-flow-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) var(--s-6);
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+}
+
+/* Below a desk the three columns stack and the floor keeps its own scroll,
+   so the map never squeezes to unreadable. */
+@media (max-width: 1100px) {
+  .hs-flow-body { grid-template-columns: 1fr; overflow-y: auto; }
+  .hs-flow-floor { min-height: 60vh; }
+  .hs-steps .hs-step-label { display: none; }
+}
+
+/* Shared rooms, advertised under the door map.
+   A dormitory cannot be drawn as a door — it is not booked whole — but it must
+   still be findable by a receptionist who has not narrowed the room type. */
+.hs-shared-strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: 0 var(--s-5) var(--s-5);
+}
+
+.hs-shared-row { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+
+.hs-shared-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  padding: var(--s-3) var(--s-4);
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+  min-width: 216px;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+
+.hs-shared-card:hover { border-color: var(--tone-active); box-shadow: var(--e-hover); }
+.hs-shared-card:focus-visible { outline: 2px solid var(--tone-info); outline-offset: 2px; }
+
+.hs-shared-name { font-weight: 700; }
+.hs-shared-rate { font-size: var(--t-caption); font-weight: 600; color: var(--ink-2); }
+.hs-shared-cta  { font-size: var(--t-caption); font-weight: 700; color: var(--tone-active); margin-top: 4px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BUNK BEDS — dormitory bedspace selection
+
+   Drawn, not boxed. A receptionist scanning a dormitory is looking for a BED,
+   so the frame has posts and rails, each mattress has a pillow and a visible
+   thickness, and the top berth sits above the bottom one. Two stacked cards
+   would say "list"; this says "bunk".
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hs-bunk-grid {
+  display: grid;
+  gap: var(--s-5) var(--s-3);
+  /* The panel sets --bunk-cols from the bunk count; the narrower-screen rules
+     below still override it, which an inline grid-template could not. */
+  grid-template-columns: repeat(var(--bunk-cols, 8), minmax(0, 1fr));
+  justify-items: center;
+  justify-content: center;
+}
+
+.hs-bunk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  /* A bed is longer than it is wide. Letting the cell stretch to a third of a
+     wide canvas produced a mattress the shape of a bench, which is the exact
+     thing that makes the grid read as boxes rather than furniture. */
+  max-width: 108px;
+}
+
+.hs-bunk-no {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--hairline-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: border-color .12s ease, color .12s ease;
+}
+
+/* The frame: posts down each side, berths between them, feet below. */
+.hs-bunk-frame {
+  position: relative;
+  width: 100%;
+  padding: 4px 7px 7px;
+}
+
+.hs-post {
+  position: absolute;
+  top: 0;
+  bottom: 7px;
+  width: 4px;
+  border-radius: 3px;
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--ink-2) 55%, transparent),
+    color-mix(in srgb, var(--ink-2) 30%, transparent));
+}
+.hs-post-l { left: 0; }
+.hs-post-r { right: 0; }
+
+.hs-foot {
+  position: absolute;
+  bottom: 0;
+  width: 4px;
+  height: 7px;
+  border-radius: 0 0 2px 2px;
+  background: color-mix(in srgb, var(--ink-2) 40%, transparent);
+}
+.hs-foot-l { left: 0; }
+.hs-foot-r { right: 0; }
+
+.hs-bunk-berths { display: flex; flex-direction: column; gap: 0; }
+
+/* The rail the upper berth stands on — what separates a bunk from two beds. */
+.hs-bunk-rail {
+  height: 4px;
+  margin: 3px 0;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink-2) 32%, transparent);
+}
+
+/* One mattress. */
+.hs-berth {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 30px;
+  padding: 0;
+  border: 1.5px solid var(--hairline-strong);
+  border-radius: 5px;
+  background: var(--surface);
+  font: inherit;
+  color: var(--ink-2);
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow .12s ease, border-color .12s ease;
+}
+
+/* Hover strengthens the edge and lifts — it never moves the layout, because a
+   grid that shifts under the cursor is a grid you misclick. */
+.hs-berth:not(.is-locked):hover {
+  border-width: 2px;
+  box-shadow: var(--e-hover);
+}
+
+.hs-berth:focus-visible {
+  outline: 2px solid var(--tone-info);
+  outline-offset: 2px;
+}
+
+.hs-berth.is-locked { cursor: not-allowed; }
+
+.hs-berth.is-selected {
+  border-width: 2.5px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone-active) 20%, transparent);
+}
+
+.hs-berth-pillow {
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  width: 19px;
+  height: 11px;
+  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--ink-3) 45%, transparent);
+  box-shadow: inset 0 -1px 2px color-mix(in srgb, var(--ink-3) 25%, transparent);
+}
+
+.hs-berth-ticking {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--ink-3);
+}
+
+.hs-berth-label {
+  position: absolute;
+  left: 27px;
+  top: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+
+.hs-berth-dot {
+  position: absolute;
+  right: 5px;
+  top: 9px;
+  width: 10px;
+  height: 10px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Status is never carried by colour alone. A bed awaiting housekeeping is
+   dashed and a bed out of order is struck through, so the grid still reads
+   correctly in greyscale and to a colour-blind receptionist. */
+.hs-berth.is-needs-cleaning { border-style: dashed; }
+
+.hs-berth.is-out-of-order::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 4px,
+    color-mix(in srgb, var(--tone-expired) 30%, transparent) 4px 6px
+  );
+  pointer-events: none;
+}
+
+/* Dormitory panel header: title, selector, metadata row.
+   It reuses .hs-floor-head so the shared-room view and the private-room floor
+   map line up to the pixel when the receptionist switches between them. */
+.hs-dorm-title { display: flex; flex-direction: column; gap: 2px; }
+
+/* One dormitory needs no dropdown — a select with a single option is a control
+   that cannot do anything, so the name is simply stated. */
+.hs-dorm-single {
+  font-size: var(--t-caption);
+  font-weight: 600;
+  color: var(--ink-2);
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-2);
+  white-space: nowrap;
+}
+
+.hs-dorm-select { min-width: 172px; width: auto; }
+
+.hs-dorm-free { margin-left: auto; color: var(--ink); font-weight: 600; }
+
+.hs-dorm-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  padding: var(--s-2) var(--s-5) var(--s-4);
+  font-size: var(--t-caption);
+  color: var(--ink-2);
+}
+
+.hs-dorm-meta span { display: inline-flex; align-items: center; gap: var(--s-2); }
+
+.hs-bunk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  padding: var(--s-3) var(--s-5);
+  margin: 0 var(--s-5) var(--s-5);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  font-size: var(--t-caption);
+}
+
+.hs-bunk-legend span { display: inline-flex; align-items: center; gap: var(--s-2); }
+
+/* Override the door-shaped floor key: in a dormitory the unit is a mattress,
+   so the swatch is wider than it is tall. */
+.hs-bunk-legend .hs-key {
+  width: 20px;
+  height: 11px;
+  border-radius: 3px;
+  border: 1px solid color-mix(in srgb, var(--ink-3) 40%, transparent);
+}
+
+
+@media (max-width: 1280px) {
+  .hs-bunk-grid { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .hs-bunk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

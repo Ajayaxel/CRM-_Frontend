@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BMN Chat Widget — Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #faf8f6; color: #3a2f2a; }
+    .hero { max-width: 720px; margin: 0 auto; padding: 80px 24px; }
+    h1 { font-size: 34px; letter-spacing: -.02em; }
+    p { color: #6b6260; line-height: 1.6; }
+    code { background: #f5f1ed; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+    .note { background: #fef9f1; border: 1px solid #e6a23c; border-radius: 12px; padding: 16px; margin-top: 24px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Bright Future Institute</h1>
+    <p>This is a sample customer website. The BMN Connect chat widget is embedded in the bottom-right — click the 💬 bubble, ask about fees or admissions, and watch the AI agent reply. The conversation shows up live in the institute's <strong>Team Inbox</strong>.</p>
+    <div class="note">
+      Embed on any site with:<br />
+      <code>&lt;script&gt;window.BMNChat={key:'demo-widget-key',api:'/omni',title:'Chat with us'}&lt;/script&gt;</code><br />
+      <code>&lt;script src="/widget.js" defer&gt;&lt;/script&gt;</code>
+    </div>
+  </div>
+
+  <script>window.BMNChat = { key: 'demo-widget-key', api: '/omni', title: 'Bright Future — Admissions', name: 'Website Visitor' };</script>
+  <script src="/widget.js" defer></script>
+</body>
+</html>

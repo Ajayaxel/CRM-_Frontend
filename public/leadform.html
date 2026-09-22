@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enquire · BMN Connect</title>
+  <style>
+    :root { --navy:#132376; --gold:#E6A23C; --ink:#1c2333; --ink2:#5b6270; --line:#e7e2d8; --green:#2f9e63; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:linear-gradient(160deg,#f6f2ea,#eef1f8); color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .card { background:#fff; width:100%; max-width:440px; border:1px solid var(--line); border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(19,35,118,.10); }
+    .head { background:var(--brand,var(--navy)); color:#fff; padding:24px; }
+    .brand { font-size:12.5px; opacity:.85; }
+    .head h1 { margin:8px 0 0; font-size:20px; }
+    .head p { margin:6px 0 0; opacity:.9; font-size:13px; }
+    .prop { background:rgba(255,255,255,.14); border-radius:10px; padding:10px 12px; margin-top:14px; font-size:12.5px; }
+    .body { padding:22px 24px; }
+    label { display:block; font-size:12px; font-weight:600; color:var(--ink2); margin:12px 0 4px; }
+    input,textarea { width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:10px; font-size:14px; font-family:inherit; }
+    button { width:100%; margin-top:18px; padding:13px; border:none; border-radius:11px; background:var(--brand,var(--navy)); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+    button:disabled { opacity:.6; }
+    .ok { text-align:center; padding:14px; background:#e9f7ef; color:var(--green); border-radius:11px; font-weight:700; }
+    .muted { text-align:center; color:var(--ink2); font-size:11.5px; margin-top:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="head" id="head"><div class="brand">Loading…</div></div>
+    <div class="body" id="body"></div>
+  </div>
+  <script>
+    const key = new URLSearchParams(location.search).get('form');
+    const money = (n)=> n==null?'':(n>=1e7?'₹'+(n/1e7).toFixed(2)+' Cr':n>=1e5?'₹'+(n/1e5).toFixed(1)+' L':'₹'+Number(n).toLocaleString('en-IN'));
+    let BTN = 'Request a callback';
+    async function load(){
+      if(!key){ document.getElementById('body').innerHTML='<div class="muted">Invalid link.</div>'; return; }
+      try{
+        const r=await fetch('/api/realestate/lead-form/'+encodeURIComponent(key)); if(!r.ok) throw 0;
+        const d=await r.json(); const a=d.agency||{}, p=d.property; BTN=d.form.buttonText||BTN;
+        if(a.primaryColor) document.documentElement.style.setProperty('--brand',a.primaryColor);
+        document.getElementById('head').innerHTML = `<div class="brand">${a.name||'BMN Connect'}</div><h1>${d.form.headline}</h1>${d.form.subheadline?`<p>${d.form.subheadline}</p>`:''}${p?`<div class="prop">🏢 ${p.title} · ${p.reference}${p.priceInr?' · '+money(p.priceInr):''}${p.area?' · '+p.area:''}</div>`:''}`;
+        document.getElementById('body').innerHTML = `
+          <label>Your name</label><input id="name" placeholder="Full name"/>
+          <label>Phone</label><input id="phone" placeholder="+91…"/>
+          <label>Email (optional)</label><input id="email"/>
+          <label>Message (optional)</label><textarea id="message" rows="2" placeholder="Preferred area, budget, timing…"></textarea>
+          <button id="btn" onclick="submit()">${BTN}</button>
+          <div class="muted">We'll never share your details.</div>`;
+      }catch{ document.getElementById('body').innerHTML='<div class="muted">This form is not available.</div>'; }
+    }
+    async function submit(){
+      const btn=document.getElementById('btn');
+      const name=document.getElementById('name').value.trim(), phone=document.getElementById('phone').value.trim();
+      if(!name||!phone){ alert('Please add your name and phone.'); return; }
+      btn.disabled=true; btn.textContent='Sending…';
+      try{
+        const r=await fetch('/api/realestate/lead-form/'+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({name,phone,email:document.getElementById('email').value.trim(),message:document.getElementById('message').value.trim()})});
+        if(!r.ok) throw 0;
+        document.getElementById('body').innerHTML='<div class="ok">✓ Thank you! Our team will call you back shortly.</div>';
+      }catch{ btn.disabled=false; btn.textContent='Try again'; }
+    }
+    load();
+  </script>
+</body>
+</html>

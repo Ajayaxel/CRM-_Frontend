@@ -1,0 +1,1595 @@
+/* ============================================================================
+   Consultant workspace — self-contained visual language.
+
+   Every rule is scoped under `.cw`, which is set once on the workspace layout.
+   Nothing here can reach Insurance, Solar, Retail or any other vertical: those
+   surfaces keep the existing BMN design system untouched.
+
+   The language is deliberately quieter than the rest of the product — near-white
+   surfaces, 1px hairlines, no elevation except on things that genuinely float,
+   colour reserved for status. Density comes from tightening line-height and
+   padding rather than shrinking type below a readable size.
+   ============================================================================ */
+
+.cw {
+  --cw-bg: #ffffff;
+  --cw-rail: #fbfbfa;
+  --cw-sunken: #f7f7f6;
+  --cw-hover: rgba(16, 16, 16, 0.038);
+  --cw-active: rgba(16, 16, 16, 0.062);
+  --cw-selected: rgba(19, 35, 118, 0.06);
+
+  --cw-line: rgba(16, 16, 16, 0.085);
+  --cw-line-soft: rgba(16, 16, 16, 0.05);
+  --cw-line-strong: rgba(16, 16, 16, 0.16);
+
+  --cw-ink: #191918;
+  --cw-ink-2: #63635e;
+  /* ink-3 carries meaning (metadata, empty markers, group headings) so it is
+     tuned to 4.6:1 on the page background — WCAG AA for small text. ink-4 is
+     for placeholders and pure decoration only; never use it for content. */
+  --cw-ink-3: #767671;
+  --cw-ink-4: #9b9b96;
+
+  --cw-accent: #132376;
+  --cw-accent-soft: rgba(19, 35, 118, 0.08);
+
+  --cw-green: #17803d;
+  --cw-green-bg: rgba(23, 128, 61, 0.09);
+  --cw-amber: #b45309;
+  --cw-amber-bg: rgba(180, 83, 9, 0.1);
+  --cw-red: #c02626;
+  --cw-red-bg: rgba(192, 38, 38, 0.09);
+  --cw-blue: #1d4ed8;
+  --cw-blue-bg: rgba(29, 78, 216, 0.09);
+  --cw-violet: #6d28d9;
+  --cw-violet-bg: rgba(109, 40, 217, 0.09);
+  --cw-slate: #52525b;
+  --cw-slate-bg: rgba(82, 82, 91, 0.09);
+
+  --cw-r: 6px;
+  --cw-r-sm: 4px;
+  --cw-r-lg: 10px;
+  --cw-float: 0 1px 1px rgba(16, 16, 16, 0.04), 0 8px 24px -6px rgba(16, 16, 16, 0.14);
+  --cw-pop: 0 1px 1px rgba(16, 16, 16, 0.05), 0 12px 32px -8px rgba(16, 16, 16, 0.18);
+
+  --cw-row-h: 36px;
+
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--cw-ink);
+  background: var(--cw-bg);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv05" 1, "ss01" 1;
+}
+
+[data-theme='dark'] .cw {
+  --cw-bg: #131315;
+  --cw-rail: #0f0f11;
+  --cw-sunken: #191a1d;
+  --cw-hover: rgba(255, 255, 255, 0.045);
+  --cw-active: rgba(255, 255, 255, 0.075);
+  --cw-selected: rgba(120, 145, 255, 0.12);
+
+  --cw-line: rgba(255, 255, 255, 0.09);
+  --cw-line-soft: rgba(255, 255, 255, 0.055);
+  --cw-line-strong: rgba(255, 255, 255, 0.17);
+
+  --cw-ink: #ededec;
+  --cw-ink-2: #a1a1a0;
+  /* 5.4:1 on the dark background — the light theme's 4.6:1 equivalent. */
+  --cw-ink-3: #8a8a88;
+  --cw-ink-4: #5c5c5a;
+
+  --cw-accent: #8ea2ff;
+  --cw-accent-soft: rgba(142, 162, 255, 0.14);
+
+  --cw-green: #4ade80;
+  --cw-green-bg: rgba(74, 222, 128, 0.13);
+  --cw-amber: #fbbf24;
+  --cw-amber-bg: rgba(251, 191, 36, 0.13);
+  --cw-red: #f87171;
+  --cw-red-bg: rgba(248, 113, 113, 0.13);
+  --cw-blue: #7aa2ff;
+  --cw-blue-bg: rgba(122, 162, 255, 0.13);
+  --cw-violet: #b48bff;
+  --cw-violet-bg: rgba(180, 139, 255, 0.13);
+  --cw-slate: #a1a1aa;
+  --cw-slate-bg: rgba(161, 161, 170, 0.13);
+
+  --cw-float: 0 1px 1px rgba(0, 0, 0, 0.4), 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+  --cw-pop: 0 1px 1px rgba(0, 0, 0, 0.5), 0 12px 32px -8px rgba(0, 0, 0, 0.7);
+}
+
+/* ------------------------------------------------------------------ Layout */
+
+.cw-app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--cw-bg);
+}
+
+.cw-rail {
+  flex: none;
+  width: 232px;
+  background: var(--cw-rail);
+  border-right: 1px solid var(--cw-line);
+  display: flex;
+  flex-direction: column;
+  transition: width 160ms cubic-bezier(0.3, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.cw-rail[data-collapsed='true'] {
+  width: 52px;
+}
+
+.cw-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cw-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cw-body {
+  padding: 0 22px 64px;
+}
+
+.cw-body-wide {
+  padding: 0 0 64px;
+}
+
+/* ------------------------------------------------------------------ Topbar */
+
+.cw-topbar {
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 0 18px;
+  border-bottom: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+}
+
+/* ------------------------------------------------------------------ Nav */
+
+.cw-nav-group {
+  padding: 4px 8px;
+}
+
+.cw-nav-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--cw-ink-3);
+  padding: 10px 8px 5px;
+}
+
+.cw-rail[data-collapsed='true'] .cw-nav-label {
+  opacity: 0;
+  height: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.cw-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: 29px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--cw-r);
+  background: transparent;
+  color: var(--cw-ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  white-space: nowrap;
+  transition: background 90ms ease, color 90ms ease;
+}
+
+.cw-nav-item:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink);
+}
+
+.cw-nav-item[data-active='true'] {
+  background: var(--cw-active);
+  color: var(--cw-ink);
+  font-weight: 600;
+}
+
+.cw-nav-item svg {
+  flex: none;
+  opacity: 0.8;
+}
+
+.cw-nav-item[data-active='true'] svg {
+  opacity: 1;
+  color: var(--cw-accent);
+}
+
+.cw-nav-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cw-rail[data-collapsed='true'] .cw-nav-text,
+.cw-rail[data-collapsed='true'] .cw-nav-trail {
+  display: none;
+}
+
+.cw-nav-trail {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cw-ink-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ Buttons */
+
+.cw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--cw-r);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  color: var(--cw-ink);
+  font-size: 12.5px;
+  font-weight: 550;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 90ms ease, border-color 90ms ease;
+}
+
+.cw-btn:hover:not(:disabled) {
+  background: var(--cw-hover);
+}
+
+.cw-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cw-btn-primary {
+  background: var(--cw-ink);
+  border-color: var(--cw-ink);
+  color: var(--cw-bg);
+}
+
+.cw-btn-primary:hover:not(:disabled) {
+  background: var(--cw-ink-2);
+  border-color: var(--cw-ink-2);
+}
+
+.cw-btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--cw-ink-2);
+}
+
+.cw-btn-ghost:hover:not(:disabled) {
+  background: var(--cw-hover);
+  color: var(--cw-ink);
+}
+
+.cw-btn-danger {
+  border-color: var(--cw-line);
+  color: var(--cw-red);
+}
+
+.cw-btn-danger:hover:not(:disabled) {
+  background: var(--cw-red-bg);
+}
+
+.cw-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--cw-r);
+  background: transparent;
+  color: var(--cw-ink-2);
+  cursor: pointer;
+  flex: none;
+  transition: background 90ms ease, color 90ms ease;
+}
+
+.cw-icon-btn:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink);
+}
+
+.cw-btn:focus-visible,
+.cw-icon-btn:focus-visible,
+.cw-nav-item:focus-visible,
+.cw-tab:focus-visible,
+.cw-cell-edit:focus-visible {
+  outline: 2px solid var(--cw-accent);
+  outline-offset: 1px;
+}
+
+/* ------------------------------------------------------------------ Inputs */
+
+.cw-input {
+  width: 100%;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--cw-r);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  color: var(--cw-ink);
+  font-size: 13px;
+  font-family: inherit;
+  transition: border-color 90ms ease, box-shadow 90ms ease;
+}
+
+.cw-input:hover {
+  border-color: var(--cw-line-strong);
+}
+
+.cw-input:focus {
+  outline: none;
+  border-color: var(--cw-accent);
+  box-shadow: 0 0 0 3px var(--cw-accent-soft);
+}
+
+textarea.cw-input {
+  height: auto;
+  padding: 7px 9px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+select.cw-input {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 24px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--cw-ink-3) 50%),
+    linear-gradient(135deg, var(--cw-ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 13px) 12px, calc(100% - 9px) 12px;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+
+.cw-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cw-ink-3);
+  margin-bottom: 5px;
+  letter-spacing: 0.005em;
+}
+
+/* ------------------------------------------------------------------ Search */
+
+.cw-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 27px;
+  padding: 0 9px;
+  border-radius: var(--cw-r);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  color: var(--cw-ink-3);
+  font-size: 12.5px;
+  cursor: pointer;
+  min-width: 190px;
+  transition: border-color 90ms ease;
+}
+
+.cw-search:hover {
+  border-color: var(--cw-line-strong);
+}
+
+.cw-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 3px;
+  border: 1px solid var(--cw-line);
+  background: var(--cw-sunken);
+  color: var(--cw-ink-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: inherit;
+}
+
+/* ------------------------------------------------------------------ Table */
+
+.cw-table-wrap {
+  overflow-x: auto;
+  overflow-y: visible;
+  border-top: 1px solid var(--cw-line);
+}
+
+/* max-content + min-width:100% keeps every column at its set width and lets
+   the wrapper scroll, rather than squeezing "Not started" down to "Not sta…"
+   the moment a table has more columns than viewport. */
+.cw-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.cw-table th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 32px;
+  padding: 0 10px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--cw-ink-3);
+  background: var(--cw-bg);
+  border-bottom: 1px solid var(--cw-line);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.cw-table th[data-num='true'],
+.cw-table td[data-num='true'] {
+  text-align: right;
+}
+
+.cw-th-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cw-th-btn:hover {
+  color: var(--cw-ink);
+}
+
+.cw-table td {
+  height: var(--cw-row-h);
+  padding: 0 10px;
+  border-bottom: 1px solid var(--cw-line-soft);
+  color: var(--cw-ink);
+  vertical-align: middle;
+  max-width: 0;
+}
+
+.cw-table tbody tr {
+  transition: background 70ms ease;
+}
+
+.cw-table tbody tr:hover {
+  background: var(--cw-hover);
+}
+
+.cw-table tbody tr[data-selected='true'] {
+  background: var(--cw-selected);
+}
+
+.cw-table tbody tr[data-clickable='true'] {
+  cursor: pointer;
+}
+
+.cw-table-sticky-first th:first-child,
+.cw-table-sticky-first td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--cw-bg);
+}
+
+.cw-table-sticky-first th:first-child {
+  z-index: 4;
+}
+
+.cw-table tbody tr:hover .cw-table-sticky-first td:first-child {
+  background: var(--cw-bg);
+}
+
+.cw-truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cells that become editors on click. The affordance is a hover tint, not a
+   permanent border — a grid of outlined inputs reads as a form, not a table. */
+.cw-cell-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% + 12px);
+  min-height: 24px;
+  margin: 0 -6px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: var(--cw-r-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 70ms ease, box-shadow 70ms ease;
+}
+
+.cw-cell-edit:hover {
+  background: var(--cw-active);
+  box-shadow: inset 0 0 0 1px var(--cw-line);
+}
+
+.cw-cell-empty {
+  color: var(--cw-ink-3);
+}
+
+/* ------------------------------------------------------------------ Chips */
+
+.cw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--cw-r-sm);
+  font-size: 11.5px;
+  font-weight: 550;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.cw-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.cw-tone-green { color: var(--cw-green); background: var(--cw-green-bg); }
+.cw-tone-amber { color: var(--cw-amber); background: var(--cw-amber-bg); }
+.cw-tone-red { color: var(--cw-red); background: var(--cw-red-bg); }
+.cw-tone-blue { color: var(--cw-blue); background: var(--cw-blue-bg); }
+.cw-tone-violet { color: var(--cw-violet); background: var(--cw-violet-bg); }
+.cw-tone-slate { color: var(--cw-slate); background: var(--cw-slate-bg); }
+
+.cw-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: var(--cw-r-sm);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-sunken);
+  color: var(--cw-ink-2);
+  font-size: 11px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ Filters */
+
+.cw-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-height: 40px;
+  padding: 6px 0;
+}
+
+.cw-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 25px;
+  border-radius: var(--cw-r);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  font-size: 12px;
+  overflow: hidden;
+}
+
+.cw-filter-chip > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--cw-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cw-filter-chip > button:hover {
+  background: var(--cw-hover);
+}
+
+.cw-filter-chip-key {
+  color: var(--cw-ink-3);
+  font-weight: 550;
+}
+
+.cw-filter-chip-val {
+  font-weight: 600;
+}
+
+.cw-filter-chip-x {
+  border-left: 1px solid var(--cw-line) !important;
+  padding: 0 5px !important;
+  color: var(--cw-ink-3) !important;
+}
+
+/* ------------------------------------------------------------------ Tabs */
+
+.cw-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--cw-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cw-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.cw-tab {
+  position: relative;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--cw-ink-3);
+  font-size: 12.5px;
+  font-weight: 550;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 90ms ease;
+}
+
+.cw-tab:hover {
+  color: var(--cw-ink);
+}
+
+.cw-tab[data-active='true'] {
+  color: var(--cw-ink);
+  font-weight: 640;
+}
+
+.cw-tab[data-active='true']::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--cw-ink);
+}
+
+.cw-tab-count {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cw-ink-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ Popover */
+
+.cw-pop {
+  position: fixed;
+  z-index: 120;
+  min-width: 200px;
+  max-height: 340px;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--cw-r-lg);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  box-shadow: var(--cw-pop);
+  overflow: hidden;
+  animation: cw-pop-in 110ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@keyframes cw-pop-in {
+  from { opacity: 0; transform: translateY(-3px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.cw-pop-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cw-line-soft);
+  flex: none;
+}
+
+.cw-pop-search input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--cw-ink);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.cw-pop-list {
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.cw-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--cw-r);
+  background: transparent;
+  color: var(--cw-ink);
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cw-opt:hover,
+.cw-opt[data-active='true'] {
+  background: var(--cw-hover);
+}
+
+.cw-opt-hint {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--cw-ink-4);
+  flex: none;
+}
+
+.cw-pop-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--cw-line-soft);
+}
+
+.cw-pop-label {
+  padding: 7px 9px 4px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cw-ink-4);
+}
+
+/* ------------------------------------------------------------------ Panel */
+
+.cw-panel-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(16, 16, 16, 0.18);
+  animation: cw-fade 120ms ease;
+}
+
+@keyframes cw-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cw-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 101;
+  width: 620px;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: var(--cw-bg);
+  border-left: 1px solid var(--cw-line);
+  box-shadow: var(--cw-float);
+  animation: cw-slide 160ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+@keyframes cw-slide {
+  from { transform: translateX(14px); opacity: 0.6; }
+  to { transform: none; opacity: 1; }
+}
+
+.cw-panel-head {
+  flex: none;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cw-line);
+}
+
+.cw-panel-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Two-column record layout: label rail then value. */
+.cw-fields {
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  align-items: center;
+  row-gap: 2px;
+  column-gap: 10px;
+}
+
+.cw-field-label {
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--cw-ink-3);
+  padding: 5px 0;
+}
+
+/* ------------------------------------------------------------------ Command menu */
+
+.cw-cmd-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(16, 16, 16, 0.28);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  padding-top: 12vh;
+  animation: cw-fade 100ms ease;
+}
+
+.cw-cmd {
+  width: 620px;
+  max-width: calc(100vw - 32px);
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  box-shadow: var(--cw-pop);
+  overflow: hidden;
+  animation: cw-pop-in 120ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.cw-cmd-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--cw-line);
+  flex: none;
+}
+
+.cw-cmd-input input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--cw-ink);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.cw-cmd-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.cw-cmd-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 13px;
+  border-top: 1px solid var(--cw-line);
+  background: var(--cw-sunken);
+  font-size: 11.5px;
+  color: var(--cw-ink-3);
+}
+
+/* ------------------------------------------------------------------ Misc */
+
+.cw-h1 {
+  font-size: 19px;
+  font-weight: 660;
+  letter-spacing: -0.014em;
+  color: var(--cw-ink);
+  margin: 0;
+}
+
+.cw-h2 {
+  font-size: 13.5px;
+  font-weight: 640;
+  letter-spacing: -0.004em;
+  color: var(--cw-ink);
+  margin: 0;
+}
+
+.cw-meta {
+  font-size: 12px;
+  color: var(--cw-ink-3);
+}
+
+.cw-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.cw-mono {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  letter-spacing: -0.01em;
+  color: var(--cw-ink-3);
+}
+
+.cw-sep {
+  height: 1px;
+  background: var(--cw-line);
+}
+
+.cw-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--cw-ink-3);
+}
+
+.cw-crumbs a {
+  color: var(--cw-ink-2);
+  text-decoration: none;
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.cw-crumbs a:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink);
+}
+
+.cw-crumbs-current {
+  color: var(--cw-ink);
+  font-weight: 600;
+}
+
+.cw-bar {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--cw-line);
+  overflow: hidden;
+  min-width: 40px;
+}
+
+.cw-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 260ms cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+.cw-skel {
+  border-radius: var(--cw-r);
+  background: var(--cw-sunken);
+  animation: cw-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes cw-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cw *,
+  .cw *::before,
+  .cw *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.cw-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 5px;
+  padding: 56px 24px;
+  color: var(--cw-ink-3);
+}
+
+.cw-empty-title {
+  font-size: 13.5px;
+  font-weight: 620;
+  color: var(--cw-ink);
+}
+
+/* Kanban */
+
+.cw-board {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+
+.cw-col {
+  flex: 0 0 266px;
+  width: 266px;
+  border-radius: var(--cw-r-lg);
+  background: var(--cw-sunken);
+  padding: 8px;
+  min-height: 120px;
+  border: 1px solid transparent;
+  transition: border-color 100ms ease;
+}
+
+.cw-col[data-over='true'] {
+  border-color: var(--cw-line-strong);
+}
+
+.cw-card {
+  border-radius: var(--cw-r);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  padding: 9px 10px;
+  cursor: grab;
+  transition: box-shadow 90ms ease, opacity 90ms ease;
+}
+
+.cw-card:hover {
+  box-shadow: var(--cw-float);
+}
+
+.cw-card[data-dragging='true'] {
+  opacity: 0.4;
+}
+
+/* Section blocks used on record overviews — a hairline heading, not a card. */
+.cw-section {
+  border-top: 1px solid var(--cw-line);
+  padding-top: 10px;
+  margin-top: 22px;
+}
+
+.cw-section:first-child {
+  margin-top: 0;
+}
+
+.cw-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* Compact list rows used inside sections. */
+.cw-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 3px 6px;
+  margin: 0 -6px;
+  border-radius: var(--cw-r-sm);
+  text-decoration: none;
+  color: inherit;
+  border: 0;
+  background: transparent;
+  width: calc(100% + 12px);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cw-row:hover {
+  background: var(--cw-hover);
+}
+
+@media (max-width: 900px) {
+  /* Below the tablet breakpoint the rail is an overlay driven by the menu
+     button, NOT by the desktop collapse preference — otherwise anyone whose
+     sidebar happens to be expanded gets it covering the whole phone screen. */
+  .cw-rail {
+    position: fixed;
+    z-index: 90;
+    height: 100vh;
+    width: 232px;
+    transform: translateX(-100%);
+    transition: transform 160ms cubic-bezier(0.3, 0, 0.2, 1);
+    box-shadow: var(--cw-float);
+  }
+  .cw-rail[data-mobile-open='true'] {
+    transform: none;
+  }
+  .cw-rail-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 89;
+    background: rgba(16, 16, 16, 0.28);
+  }
+  .cw-body {
+    padding: 0 14px 56px;
+  }
+  .cw-panel {
+    width: 100vw;
+  }
+}
+
+/* ------------------------------------------------------- Record primitives */
+
+/* The title doubles as its own editor: same metrics in both states, so
+   clicking into it does not shift the page by a pixel. */
+.cw-record-title {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 1px 5px;
+  margin-left: -5px;
+  border: 1px solid transparent;
+  border-radius: var(--cw-r);
+  background: transparent;
+  color: var(--cw-ink);
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 660;
+  line-height: 1.32;
+  letter-spacing: -0.014em;
+  resize: none;
+  overflow: hidden;
+}
+
+textarea.cw-record-title:hover {
+  border-color: var(--cw-line);
+}
+
+textarea.cw-record-title:focus {
+  outline: none;
+  border-color: var(--cw-accent);
+  box-shadow: 0 0 0 3px var(--cw-accent-soft);
+  background: var(--cw-bg);
+}
+
+.cw-reclink {
+  border-radius: var(--cw-r-sm);
+  padding: 1px 4px;
+  margin: 0 -4px;
+  transition: background 80ms ease, color 80ms ease;
+}
+
+.cw-reclink:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink);
+}
+
+.cw-reclink:focus-visible {
+  outline: 2px solid var(--cw-accent);
+  outline-offset: 1px;
+}
+
+/* ------------------------------------------------------- Density */
+
+.cw[data-density='compact'] {
+  --cw-row-h: 30px;
+  font-size: 12.5px;
+}
+
+.cw[data-density='compact'] .cw-table th {
+  height: 28px;
+}
+
+/* ------------------------------------------------------- Keyboard cursor */
+
+.cw-table tbody tr[data-cursor='true'] {
+  box-shadow: inset 2px 0 0 var(--cw-accent);
+  background: var(--cw-hover);
+}
+
+.cw-table tbody tr[data-cursor='true'][data-selected='true'] {
+  background: var(--cw-selected);
+}
+
+/* ------------------------------------------------------- Timeline links */
+
+.cw-gantt {
+  position: relative;
+}
+
+.cw-gantt-links {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+.cw-gantt-link {
+  fill: none;
+  stroke: var(--cw-ink-4);
+  stroke-width: 1.25;
+  opacity: 0.65;
+}
+
+.cw-gantt-link[data-blocked='true'] {
+  stroke: var(--cw-red);
+  opacity: 0.8;
+}
+
+.cw-gantt-arrow {
+  fill: var(--cw-ink-4);
+}
+
+.cw-gantt-arrow[data-blocked='true'] {
+  fill: var(--cw-red);
+}
+
+/* ------------------------------------------------------- Responsive tables */
+
+/* Below the tablet breakpoint a wide grid stops being readable, so each row
+   becomes a record card built from the same cells (spec §31). Headers are
+   hidden and each cell carries its own label. */
+@media (max-width: 760px) {
+  .cw-table-responsive thead {
+    display: none;
+  }
+
+  .cw-table-responsive,
+  .cw-table-responsive tbody,
+  .cw-table-responsive tr,
+  .cw-table-responsive td {
+    display: block;
+    width: auto;
+    max-width: none;
+  }
+
+  .cw-table-responsive tr {
+    position: relative;
+    border: 1px solid var(--cw-line);
+    border-radius: var(--cw-r);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--cw-bg);
+  }
+
+  .cw-table-responsive td {
+    height: auto;
+    min-height: 26px;
+    padding: 2px 0;
+    border: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cw-table-responsive td::before {
+    content: attr(data-label);
+    flex: none;
+    width: 88px;
+    font-size: 11.5px;
+    color: var(--cw-ink-3);
+  }
+
+  /* The identity cell reads as the card title, so it drops its label. Keyed by
+     class, not position: a selectable table puts a checkbox cell first. */
+  .cw-table-responsive td.cw-col-identity {
+    padding-bottom: 7px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--cw-line-soft);
+    font-weight: 600;
+  }
+
+  .cw-table-responsive td.cw-col-identity::before {
+    display: none;
+  }
+
+  /* Bulk selection is a desktop affordance; on a phone it just eats a row. */
+  .cw-table-responsive td.cw-col-select {
+    display: none;
+  }
+
+  .cw-table-responsive td[data-num='true'] {
+    text-align: left;
+  }
+
+  .cw-table-wrap {
+    overflow-x: visible;
+    border-top: 0;
+  }
+
+  .cw-fields {
+    grid-template-columns: 104px 1fr;
+  }
+
+  .cw-topbar {
+    padding-left: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cw-fields {
+    grid-template-columns: 1fr;
+    row-gap: 0;
+  }
+
+  .cw-field-label {
+    padding-bottom: 0;
+  }
+}
+
+/* The rail is a fixed overlay below the tablet breakpoint, so the topbar grows
+   a menu button there and only there. */
+.cw-only-mobile {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .cw-only-mobile {
+    display: inline-flex;
+  }
+}
+
+/* ------------------------------------------------------- Block editor */
+
+.cw-be {
+  max-width: 100%;
+}
+
+.cw-be-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  margin-left: -30px;
+  padding-left: 30px;
+  border-radius: var(--cw-r-sm);
+}
+
+.cw-be-row[data-dragging='true'] {
+  opacity: 0.4;
+}
+
+.cw-be-row[data-over='true'] {
+  box-shadow: 0 -2px 0 -1px var(--cw-accent);
+}
+
+/* The rail only appears on hover, so a page of prose reads as prose. */
+.cw-be-rail {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  display: flex;
+  opacity: 0;
+  transition: opacity 90ms ease;
+}
+
+.cw-be-row:hover .cw-be-rail,
+.cw-be-row:focus-within .cw-be-rail {
+  opacity: 1;
+}
+
+.cw-be-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--cw-r-sm);
+  background: transparent;
+  color: var(--cw-ink-4);
+  cursor: grab;
+}
+
+.cw-be-handle:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink-2);
+}
+
+.cw-be-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cw-be-marker {
+  flex: none;
+  padding-top: 3px;
+  color: var(--cw-ink-3);
+  user-select: none;
+}
+
+/* Marker classes are deliberately NOT named after block types: the block
+   element itself carries `cw-be-<type>`, so a `.cw-be-bullet` marker rule would
+   also match a bullet block and collapse it to the width of the glyph. */
+.cw-be-dot {
+  display: inline-block;
+  width: 14px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.cw-be-index {
+  display: inline-block;
+  min-width: 16px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cw-be-check {
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  accent-color: var(--cw-green);
+}
+
+.cw-be-block {
+  outline: none;
+  min-height: 1.6em;
+  padding: 2px 0;
+  line-height: 1.65;
+  font-size: 14.5px;
+  word-break: break-word;
+}
+
+.cw-be-block:empty::before,
+.cw-be-block[data-empty='true']::before {
+  content: attr(data-placeholder);
+  color: var(--cw-ink-4);
+  pointer-events: none;
+}
+
+.cw-be-h1 { font-size: 21px; font-weight: 660; letter-spacing: -0.018em; margin-top: 14px; }
+.cw-be-h2 { font-size: 17px; font-weight: 640; letter-spacing: -0.012em; margin-top: 10px; }
+.cw-be-h3 { font-size: 15px; font-weight: 640; margin-top: 8px; }
+
+.cw-be-quote {
+  padding-left: 12px;
+  border-left: 2px solid var(--cw-line-strong);
+  color: var(--cw-ink-2);
+}
+
+.cw-be-code {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 12.5px;
+  background: var(--cw-sunken);
+  border-radius: var(--cw-r);
+  padding: 9px 11px;
+  white-space: pre-wrap;
+}
+
+.cw-be-todo[data-checked='true'] {
+  text-decoration: line-through;
+  color: var(--cw-ink-3);
+}
+
+.cw-be-block a { color: var(--cw-accent); }
+
+.cw-be-slash {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  z-index: 60;
+  width: 268px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: var(--cw-r-lg);
+  border: 1px solid var(--cw-line);
+  background: var(--cw-bg);
+  box-shadow: var(--cw-pop);
+}
+
+.cw-be-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: var(--cw-r-sm);
+  background: transparent;
+  color: var(--cw-ink-4);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cw-be-add:hover {
+  background: var(--cw-hover);
+  color: var(--cw-ink-2);
+}
+
+.cw-doc-title {
+  display: block;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--cw-ink);
+  font-family: inherit;
+  font-size: 27px;
+  font-weight: 680;
+  letter-spacing: -0.024em;
+  line-height: 1.25;
+  outline: none;
+}
+
+.cw-doc-title::placeholder {
+  color: var(--cw-ink-4);
+}
+
+.cw-cal-item {
+  display: block;
+  width: 100%;
+  font-size: 10.5px;
+  line-height: 1.35;
+  padding: 2px 5px;
+  border: 0;
+  border-left: 2px solid;
+  border-radius: var(--cw-r-sm);
+  background: var(--cw-sunken);
+  color: var(--cw-ink-2);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.cw-cal-item:hover {
+  background: var(--cw-active);
+  color: var(--cw-ink);
+}

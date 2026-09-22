@@ -1,0 +1,1 @@
+export { GroupConsole } from './console';
